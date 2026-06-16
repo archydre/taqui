@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: taqui-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: taqui
+      POSTGRES_USER: taqui
+      POSTGRES_PASSWORD: taqui
+    ports:
+      - "5432:5432"
+    volumes:
+      - taqui-pgdata:/var/lib/postgresql/data
+
+volumes:
+  taqui-pgdata:
