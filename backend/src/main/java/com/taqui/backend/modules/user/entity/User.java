@@ -1,11 +1,13 @@
 package com.taqui.backend.modules.user.entity;
 
+import com.taqui.backend.modules.product.entity.Product;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -32,4 +34,6 @@ public class User {
     @Column(name = "username", unique = true, nullable = false)
     private String username;
 
+    @OneToMany(mappedBy = "owner")
+    private List<Product> products;
 }
