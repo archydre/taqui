@@ -1,6 +1,9 @@
 package com.taqui.backend.modules.auth.controller;
 
-import com.taqui.backend.modules.user.dto.UserLoginDTO;
+import com.taqui.backend.modules.auth.service.AuthService;
+import com.taqui.backend.modules.user.dto.LoginRequestDTO;
+import com.taqui.backend.modules.user.dto.LoginResponseDTO;
+import com.taqui.backend.modules.user.dto.RegisterRequestDTO;
 import com.taqui.backend.modules.user.dto.UserResponseDTO;
 import com.taqui.backend.modules.user.entity.User;
 import com.taqui.backend.modules.user.mapper.UserMapper;
@@ -21,11 +24,17 @@ public class AuthController {
 
     private final UserService userService;
     private final UserMapper userMapper;
+    private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody UserLoginDTO request) {
+    public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request) {
         User createdUser = userService.createUser(request);
         UserResponseDTO body = userMapper.toResponse(createdUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 }

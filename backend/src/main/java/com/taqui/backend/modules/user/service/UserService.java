@@ -1,6 +1,6 @@
 package com.taqui.backend.modules.user.service;
 
-import com.taqui.backend.modules.user.dto.UserLoginDTO;
+import com.taqui.backend.modules.user.dto.RegisterRequestDTO;
 import com.taqui.backend.modules.user.mapper.UserMapper;
 import com.taqui.backend.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +19,11 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public User createUser(UserLoginDTO userLoginDTO) {
-        if(userRepository.existsByEmail(userLoginDTO.email())) {
+    public User createUser(RegisterRequestDTO registerRequestDTO) {
+        if(userRepository.existsByEmail(registerRequestDTO.email())) {
             throw new EmailAlreadyExistsException("Email já está sendo utilizado");
         }
-        User createdUser = userMapper.toEntity(userLoginDTO);
+        User createdUser = userMapper.toEntity(registerRequestDTO);
         createdUser.setPassword(passwordEncoder.encode(createdUser.getPassword()));
         return userRepository.save(createdUser);
     }
