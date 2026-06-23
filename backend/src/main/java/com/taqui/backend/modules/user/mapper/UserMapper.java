@@ -1,6 +1,7 @@
 package com.taqui.backend.modules.user.mapper;
 
 import com.taqui.backend.modules.user.dto.RegisterRequestDTO;
+import com.taqui.backend.modules.user.dto.UserPublicInfoDTO;
 import com.taqui.backend.modules.user.dto.UserResponseDTO;
 import com.taqui.backend.modules.user.entity.User;
 import org.mapstruct.Mapper;
@@ -13,4 +14,6 @@ public interface UserMapper {
     User toEntity(RegisterRequestDTO registerRequestDTO);
 
     UserResponseDTO toResponse(User user);
+
+    UserPublicInfoDTO toUserPublicInfo(User user);
 }
