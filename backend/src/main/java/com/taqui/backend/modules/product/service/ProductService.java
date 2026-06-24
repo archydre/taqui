@@ -24,39 +24,35 @@ public class ProductService {
     private final UserRepository userRepository;
 
     @Transactional
-    public Product create(ProductRequestDTO dto, UUID ownerId) {
-        Product product = productMapper.toEntity(dto);   // owner fica null aqui (foi ignorado no mapper)
+    public Product createProduct(ProductRequestDTO productRequestDTO, UUID ownerId) {
+        Product product = productMapper.toEntity(productRequestDTO);
         User owner = userRepository.getReferenceById(ownerId);
-        product.setOwner(owner);                         // ← o dono entra AQUI, vindo do JWT
+        product.setOwner(owner);
         return productRepository.save(product);
     }
 
     @Transactional(readOnly = true)
-    public List<Product> findAll() {
+    public List<Product> findAllProducts() {
         return productRepository.findAll();
     }
 
     @Transactional(readOnly = true)
-    public Product findById(UUID id) {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Produto não encontrado: " + id));
+    public Product findProductById(UUID productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException("Produto não encontrado: " + productId));
     }
 
     @Transactional
-    public Product update(UUID id, ProductRequestDTO dto, UUID currentUserId) {
-        Product product = findById(id);             // 404 se não existir
-        checkOwnership(product, currentUserId);     // 403 se não for o dono
-
-        product.setProductName(dto.productName());
-        product.setProductDescription(dto.productDescription());
-        product.setPrice(dto.price());
-        product.setImageUrl(dto.imageUrl());
-        return product;     // não precisa save() — ver "dirty checking" abaixo
+    public Product update(UUID productId, ProductRequestDTO productRequestDTO, UUID currentUserId) {
+        Product product = findProductById(productId);
+        checkOwnership(product, currentUserId);
+        productMapper.updateEntityFromDTO(productRequestDTO, product);
+        return product;
     }
 
     @Transactional
-    public void delete(UUID id, UUID currentUserId) {
-        Product product = findById(id);
+    public void delete(UUID productId, UUID currentUserId) {
+        Product product = findProductById(productId);
         checkOwnership(product, currentUserId);
         productRepository.delete(product);
     }
