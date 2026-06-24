@@ -1,36 +1,40 @@
 # Backend — taqui
 
-API REST (Spring Boot) consumida pelo frontend. Stack, comandos e banco em [`CLAUDE.md`](./CLAUDE.md).
+API REST em Spring Boot. Stack, comandos e banco estão no [CLAUDE.md](./CLAUDE.md).
 
-Documentação interativa (gerada): **Swagger UI** em `/swagger-ui.html` quando o app está rodando.
+Com o app rodando, o Swagger UI fica em `/swagger-ui.html`.
 
 ## Endpoints
 
-> Atualizado conforme os endpoints são criados.
+### Auth
 
-### Auth (`/auth`) — público
+Rotas públicas.
 
-| Método | Rota | Descrição | Corpo (req) | Resposta |
-|--------|------|-----------|-------------|----------|
-| `POST` | `/auth/register` | Cadastro de usuário | `RegisterRequestDTO` (email, password, username) | `201` `UserResponseDTO` (sem password) · `400` inválido · `409` email já existe |
-| `POST` | `/auth/login` | Login → emite JWT | `LoginRequestDTO` (email, password) | `200` `LoginResponseDTO` (token, tokenType, expiresInMinutes) · `401` credenciais inválidas |
+| Método | Rota | O que faz |
+|--------|------|-----------|
+| POST | `/auth/register` | cria um usuário (email, password, username) |
+| POST | `/auth/login` | valida as credenciais e devolve um JWT |
 
-### Products (`/products`) — exige `Authorization: Bearer <jwt>`
+### Products
 
-| Método | Rota | Descrição | Corpo (req) | Resposta |
-|--------|------|-----------|-------------|----------|
-| `POST` | `/products` | Cria produto (dono = usuário do token) | `ProductRequestDTO` | `201` `ProductResponseDTO` · `400` inválido · `401` |
-| `GET` | `/products` | Lista todos os produtos | — | `200` `ProductResponseDTO[]` · `401` |
-| `GET` | `/products/{productId}` | Detalha um produto | — | `200` `ProductResponseDTO` · `404` · `401` |
-| `PUT` | `/products/{productId}` | Atualiza (só o dono) | `ProductRequestDTO` | `200` `ProductResponseDTO` · `400` · `403` não é o dono · `404` · `401` |
-| `DELETE` | `/products/{productId}` | Remove (só o dono) | — | `204` · `403` não é o dono · `404` · `401` |
+Todas precisam do header `Authorization: Bearer <jwt>`.
 
-**`ProductRequestDTO`**: `productName` (obrigatório, ≤100), `productDescription` (≤500), `price` (obrigatório, > 0), `imageUrl`.
-**`ProductResponseDTO`**: `productId`, `productName`, `productDescription`, `price`, `imageUrl`, `owner` (`userId`, `username`), `createdAt`, `updatedAt`.
+| Método | Rota | O que faz |
+|--------|------|-----------|
+| POST | `/products` | cria um produto; o dono vem do token |
+| GET | `/products` | lista todos |
+| GET | `/products/{productId}` | retorna um |
+| PUT | `/products/{productId}` | atualiza, só o dono |
+| DELETE | `/products/{productId}` | remove, só o dono |
 
-Erros seguem o padrão **RFC 7807** (`ProblemDetail`).
+O corpo de criar e atualizar é o `ProductRequestDTO`: `productName`, `productDescription`,
+`price` e `imageUrl`. A resposta inclui o `owner` (só id e username) e os timestamps.
 
-### Planejados
+Os erros usam o formato ProblemDetail (RFC 7807). Os códigos: 400 quando o corpo é
+inválido, 401 sem token ou token inválido, 403 quando você não é o dono, 404 quando o
+recurso não existe e 409 no register quando o email já está cadastrado.
 
-- `GET /users/me`, `GET /users/{id}`, `PUT /users/me`, `DELETE /users/me` — perfil (exigem autenticação).
-- Módulo **Post** (feed) — mesmo molde de Product.
+## Ainda falta
+
+- CRUD de perfil (`/users/me`, `/users/{id}`).
+- Módulo de posts pro feed.
