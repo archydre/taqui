@@ -36,4 +36,8 @@ public class User {
 
     @OneToMany(mappedBy = "owner")
     private List<Product> products;
+
+    @NotBlank
+    @Column(name = "displayName")
+    private String displayName;
 }
