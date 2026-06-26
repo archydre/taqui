@@ -10,6 +10,8 @@ import com.taqui.backend.modules.product.entity.Product;
 import com.taqui.backend.modules.product.service.ProductService;
 import com.taqui.backend.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,8 +35,8 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<Post> findAllPosts() {
-        return postRepository.findAll();
+    public Page<Post> findAllByOrderByCreatedAtDesc(Pageable pageable) {
+        return  postRepository.findAllByOrderByCreatedAtDesc(pageable);
     }
 
     @Transactional

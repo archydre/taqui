@@ -37,7 +37,7 @@ Todas precisam do header `Authorization: Bearer <jwt>`.
 | Método | Rota | O que faz |
 |--------|------|-----------|
 | POST | `/posts` | cria um post; o dono vem do token |
-| GET | `/posts` | lista todos |
+| GET | `/posts` | lista o feed, paginado e do mais novo pro mais antigo |
 | GET | `/posts/{postId}` | retorna um |
 | PUT | `/posts/{postId}` | atualiza, só o dono |
 | DELETE | `/posts/{postId}` | remove, só o dono |
@@ -51,6 +51,10 @@ Há dois tipos, definidos por enviar ou não `productId` no corpo (`content`, `i
 
 A resposta (`PostResponseDTO`) inclui `owner` (id, username e displayName), o `product`
 (null no post comum) e os timestamps.
+
+O `GET /posts` é paginado: aceita `?page` (default 0) e `?size` (default 20) e devolve um
+`Page` — os posts vêm em `content` e os metadados (`totalElements`, `totalPages`, `number`,
+`first`, `last`...) no mesmo objeto. A ordem é sempre do mais novo pro mais antigo (`createdAt` desc).
 
 Os erros usam o formato ProblemDetail (RFC 7807). Os códigos: 400 quando o corpo é
 inválido, 401 sem token ou token inválido, 403 quando você não é o dono, 404 quando o
