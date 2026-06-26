@@ -23,14 +23,6 @@ public class ProductService {
     private final ProductMapper productMapper;
     private final UserRepository userRepository;
 
-    @Transactional
-    public Product createProduct(ProductRequestDTO productRequestDTO, UUID ownerId) {
-        Product product = productMapper.toEntity(productRequestDTO);
-        User owner = userRepository.getReferenceById(ownerId);
-        product.setOwner(owner);
-        return productRepository.save(product);
-    }
-
     @Transactional(readOnly = true)
     public List<Product> findAllProducts() {
         return productRepository.findAll();
@@ -43,17 +35,26 @@ public class ProductService {
     }
 
     @Transactional
-    public Product update(UUID productId, ProductRequestDTO productRequestDTO, UUID currentUserId) {
+    public Product createProduct(ProductRequestDTO productRequestDTO, UUID ownerId) {
+        Product product = productMapper.toEntity(productRequestDTO);
+        User owner = userRepository.getReferenceById(ownerId);
+        product.setOwner(owner);
+        return productRepository.save(product);
+    }
+
+
+    @Transactional
+    public Product updateProduct(ProductRequestDTO productRequestDTO, UUID ownerId, UUID productId) {
         Product product = findProductById(productId);
-        checkOwnership(product, currentUserId);
+        checkOwnership(product, ownerId);
         productMapper.updateEntityFromDTO(productRequestDTO, product);
         return product;
     }
 
     @Transactional
-    public void delete(UUID productId, UUID currentUserId) {
+    public void delete(UUID productId, UUID ownerId) {
         Product product = findProductById(productId);
-        checkOwnership(product, currentUserId);
+        checkOwnership(product, ownerId);
         productRepository.delete(product);
     }
 

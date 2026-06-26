@@ -52,7 +52,7 @@ public class ProductController {
                                                             @Valid @RequestBody ProductRequestDTO productRequestDTO,
                                                             @AuthenticationPrincipal Jwt jwt) {
         UUID currentUserId = UUID.fromString(jwt.getSubject());
-        Product updatedProduct = productService.update(productId, productRequestDTO, currentUserId);
+        Product updatedProduct = productService.updateProduct(productRequestDTO, currentUserId, productId);
         return ResponseEntity.ok(productMapper.toResponseDTO(updatedProduct));
     }
 
