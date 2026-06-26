@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record ProductResponseDTO(
-        UUID id,
+        UUID productId,
         String productName,
         String productDescription,
         BigDecimal price,

@@ -15,13 +15,13 @@ public interface ProductMapper {
     @Mapping(target = "owner", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    Product toEntity(ProductRequestDTO dto);
+    Product toEntity(ProductRequestDTO productRequestDTO);
 
-    ProductResponseDTO toResponse(Product product);
+    ProductResponseDTO toResponseDTO(Product product);
 
     @Mapping(target = "productId", ignore = true)
     @Mapping(target = "owner", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    void updateEntityFromDTO(ProductRequestDTO dto, @MappingTarget Product product);
+    void updateEntityFromDTO(ProductRequestDTO productRequestDTO, @MappingTarget Product product);
 }
