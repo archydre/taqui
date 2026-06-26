@@ -1,5 +1,6 @@
 package com.taqui.backend.modules.user.entity;
 
+import com.taqui.backend.modules.post.entity.Post;
 import com.taqui.backend.modules.product.entity.Product;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -36,6 +37,9 @@ public class User {
 
     @OneToMany(mappedBy = "owner")
     private List<Product> products;
+
+    @OneToMany(mappedBy = "owner")
+    private List<Post> posts;
 
     @NotBlank
     @Column(name = "displayName")

@@ -1,6 +1,8 @@
 package com.taqui.backend.exception;
 
 import com.taqui.backend.modules.product.exception.ProductNotFoundException;
+import com.taqui.backend.modules.post.exception.InvalidPostException;
+import com.taqui.backend.modules.post.exception.PostNotFoundException;
 import com.taqui.backend.modules.user.exception.EmailAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -45,5 +47,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ProblemDetail handleAccessDenied(AccessDeniedException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
+    @ExceptionHandler(PostNotFoundException.class)
+    public ProblemDetail handlePostNotFound(PostNotFoundException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidPostException.class)
+    public ProblemDetail handleInvalidPost(InvalidPostException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }
