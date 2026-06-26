@@ -42,6 +42,6 @@ public class User {
     private List<Post> posts;
 
     @NotBlank
-    @Column(name = "displayName")
+    @Column(name = "display_name")
     private String displayName;
 }

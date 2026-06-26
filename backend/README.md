@@ -12,7 +12,7 @@ Rotas públicas.
 
 | Método | Rota | O que faz |
 |--------|------|-----------|
-| POST | `/auth/register` | cria um usuário (email, password, username) |
+| POST | `/auth/register` | cria um usuário (email, password, username, displayName) |
 | POST | `/auth/login` | valida as credenciais e devolve um JWT |
 
 ### Products
@@ -28,7 +28,7 @@ Todas precisam do header `Authorization: Bearer <jwt>`.
 | DELETE | `/products/{productId}` | remove, só o dono |
 
 O corpo de criar e atualizar é o `ProductRequestDTO`: `productName`, `productDescription`,
-`price` e `imageUrl`. A resposta inclui o `owner` (só id e username) e os timestamps.
+`price` e `imageUrl`. A resposta inclui o `owner` (id, username e displayName) e os timestamps.
 
 ### Posts
 
@@ -49,7 +49,8 @@ Há dois tipos, definidos por enviar ou não `productId` no corpo (`content`, `i
   produto aninhado e `type: "ANUNCIO"`.
 - **comum** — sem `productId`; precisa de `content` ou `imageUrl`, senão 400 (`type: "COMUM"`).
 
-A resposta (`PostResponseDTO`) inclui `owner`, o `product` (null no post comum) e os timestamps.
+A resposta (`PostResponseDTO`) inclui `owner` (id, username e displayName), o `product`
+(null no post comum) e os timestamps.
 
 Os erros usam o formato ProblemDetail (RFC 7807). Os códigos: 400 quando o corpo é
 inválido, 401 sem token ou token inválido, 403 quando você não é o dono, 404 quando o
