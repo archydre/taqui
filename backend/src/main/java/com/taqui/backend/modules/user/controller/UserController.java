@@ -6,6 +6,8 @@ import com.taqui.backend.modules.user.entity.User;
 import com.taqui.backend.modules.user.mapper.UserMapper;
 import com.taqui.backend.modules.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -20,6 +22,15 @@ public class UserController {
 
     private final UserService userService;
     private final UserMapper userMapper;
+
+    @GetMapping
+    public ResponseEntity<Page<UserPublicInfoDTO>> searchUsers(
+            @RequestParam(value = "q", required = false, defaultValue = "") String q,
+            Pageable pageable) {
+        Page<UserPublicInfoDTO> body = userService.searchUsers(q, pageable)
+                .map(userMapper::toUserPublicInfo);
+        return ResponseEntity.ok(body);
+    }
 
     @GetMapping("/me")
     public ResponseEntity<UserResponseDTO> getMe(@AuthenticationPrincipal Jwt jwt) {

@@ -8,6 +8,8 @@ import com.taqui.backend.modules.user.entity.User;
 import com.taqui.backend.modules.user.exception.EmailAlreadyExistsException;
 import com.taqui.backend.modules.user.exception.UsernameAlreadyExistsException;
 import com.taqui.backend.modules.user.exception.UserNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,5 +52,14 @@ public class UserService {
     public User findUserById(UUID userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
+    }
+
+    public Page<User> searchUsers(String query, Pageable pageable) {
+        String term = query == null ? "" : query.trim();
+        if (term.length() < 2) {
+            return Page.empty(pageable);
+        }
+        return userRepository
+                .findByUsernameContainingIgnoreCaseOrDisplayNameContainingIgnoreCase(term, term, pageable);
     }
 }
