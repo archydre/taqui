@@ -6,13 +6,15 @@ import com.taqui.backend.modules.product.exception.ProductNotFoundException;
 import com.taqui.backend.modules.product.mapper.ProductMapper;
 import com.taqui.backend.modules.product.repository.ProductRepository;
 import com.taqui.backend.modules.user.entity.User;
+import com.taqui.backend.modules.user.exception.UserNotFoundException;
 import com.taqui.backend.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -24,8 +26,14 @@ public class ProductService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public List<Product> findAllProducts() {
-        return productRepository.findAll();
+    public Page<Product> findAllProductsByOrderByCreatedAtDesc(String owner, Pageable pageable) {
+        if (owner == null || owner.isBlank()) {
+            return productRepository.findAllByOrderByCreatedAtDesc(pageable);
+        }
+        if (!userRepository.existsByUsername(owner)) {
+            throw new UserNotFoundException("Usuário não encontrado: " + owner);
+        }
+        return productRepository.findByOwner_UsernameOrderByCreatedAtDesc(owner, pageable);
     }
 
     @Transactional(readOnly = true)
