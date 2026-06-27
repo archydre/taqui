@@ -60,6 +60,19 @@ Os erros usam o formato ProblemDetail (RFC 7807). Os códigos: 400 quando o corp
 inválido, 401 sem token ou token inválido, 403 quando você não é o dono, 404 quando o
 recurso não existe e 409 no register quando o email já está cadastrado.
 
+### Uploads
+
+Precisa do header `Authorization: Bearer <jwt>`.
+
+| Método | Rota | O que faz |
+|--------|------|-----------|
+| POST | `/uploads` | gera uma URL pré-assinada pra subir uma imagem direto no R2 |
+
+O corpo é o `UploadRequestDTO`: `contentType` (só `image/png`, `image/jpeg` ou `image/webp`). A
+resposta (`UploadResponseDTO`) traz `uploadUrl` (URL pré-assinada — faça o `PUT` do arquivo nela
+com o mesmo `Content-Type`) e `publicUrl` (URL pública final, é ela que vai no `imageUrl` do
+produto/post). A `uploadUrl` expira em poucos minutos.
+
 ## Ainda falta
 
 - CRUD de perfil (`/users/me`, `/users/{id}`).
