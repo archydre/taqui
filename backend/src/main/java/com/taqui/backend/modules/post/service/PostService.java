@@ -8,6 +8,7 @@ import com.taqui.backend.modules.post.mapper.PostMapper;
 import com.taqui.backend.modules.post.repository.PostRepository;
 import com.taqui.backend.modules.product.entity.Product;
 import com.taqui.backend.modules.product.service.ProductService;
+import com.taqui.backend.modules.user.exception.UserNotFoundException;
 import com.taqui.backend.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,8 +36,14 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Post> findAllByOrderByCreatedAtDesc(Pageable pageable) {
-        return  postRepository.findAllByOrderByCreatedAtDesc(pageable);
+    public Page<Post> findAllByOrderByCreatedAtDesc(String owner, Pageable pageable) {
+        if (owner == null || owner.isBlank()) {
+            return postRepository.findAllByOrderByCreatedAtDesc(pageable);
+        }
+        if (!userRepository.existsByUsername(owner)) {
+            throw new UserNotFoundException("Usuário não encontrado: " + owner);
+        }
+        return postRepository.findByOwner_UsernameOrderByCreatedAtDesc(owner, pageable);
     }
 
     @Transactional
