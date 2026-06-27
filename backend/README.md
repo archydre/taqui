@@ -17,7 +17,8 @@ Rotas públicas.
 
 ### Products
 
-Todas precisam do header `Authorization: Bearer <jwt>`.
+Os GET são públicos (vitrine, sem login). Criar, atualizar e apagar precisam do header
+`Authorization: Bearer <jwt>`.
 
 | Método | Rota | O que faz |
 |--------|------|-----------|
@@ -32,7 +33,8 @@ O corpo de criar e atualizar é o `ProductRequestDTO`: `productName`, `productDe
 
 ### Posts
 
-Todas precisam do header `Authorization: Bearer <jwt>`.
+Os GET são públicos (vitrine, sem login). Criar, atualizar e apagar precisam do header
+`Authorization: Bearer <jwt>`.
 
 | Método | Rota | O que faz |
 |--------|------|-----------|
@@ -89,7 +91,3 @@ Modelo **guest browsing**: leitura de vitrine é pública, ação exige login. O
 token e devolve o `UserResponseDTO` (com email) do dono do token. O `username` é validado no
 register por
 `^[a-z0-9._]{3,30}$`, é único (409 se repetir) e alguns nomes são reservados (ex.: `me`, `admin`).
-
-## Ainda falta
-
-- Perfil do próprio usuário (`GET /users/me`, com email) e busca (`GET /users?q=`).
