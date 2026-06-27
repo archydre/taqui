@@ -6,6 +6,8 @@ import com.taqui.backend.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import com.taqui.backend.modules.user.entity.User;
 import com.taqui.backend.modules.user.exception.EmailAlreadyExistsException;
+import com.taqui.backend.modules.user.exception.UsernameAlreadyExistsException;
+import com.taqui.backend.modules.user.exception.UserNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,8 +25,16 @@ public class UserService {
         if(userRepository.existsByEmail(registerRequestDTO.email())) {
             throw new EmailAlreadyExistsException("Email já está sendo utilizado");
         }
+        if(userRepository.existsByUsername(registerRequestDTO.username())) {
+            throw new UsernameAlreadyExistsException("Username já está sendo utilizado");
+        }
         User createdUser = userMapper.toEntity(registerRequestDTO);
         createdUser.setPassword(passwordEncoder.encode(createdUser.getPassword()));
         return userRepository.save(createdUser);
+    }
+
+    public User findUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado: " + username));
     }
 }

@@ -4,6 +4,8 @@ import com.taqui.backend.modules.product.exception.ProductNotFoundException;
 import com.taqui.backend.modules.post.exception.InvalidPostException;
 import com.taqui.backend.modules.post.exception.PostNotFoundException;
 import com.taqui.backend.modules.user.exception.EmailAlreadyExistsException;
+import com.taqui.backend.modules.user.exception.UsernameAlreadyExistsException;
+import com.taqui.backend.modules.user.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
@@ -21,6 +23,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ProblemDetail handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(UsernameAlreadyExistsException.class)
+    public ProblemDetail handleUsernameAlreadyExists(UsernameAlreadyExistsException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ProblemDetail handleUserNotFound(UserNotFoundException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(BadCredentialsException.class)

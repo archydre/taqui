@@ -58,7 +58,7 @@ O `GET /posts` é paginado: aceita `?page` (default 0) e `?size` (default 20) e 
 
 Os erros usam o formato ProblemDetail (RFC 7807). Os códigos: 400 quando o corpo é
 inválido, 401 sem token ou token inválido, 403 quando você não é o dono, 404 quando o
-recurso não existe e 409 no register quando o email já está cadastrado.
+recurso não existe e 409 no register quando o email ou o username já está cadastrado.
 
 ### Uploads
 
@@ -73,6 +73,17 @@ resposta (`UploadResponseDTO`) traz `uploadUrl` (URL pré-assinada — faça o `
 com o mesmo `Content-Type`) e `publicUrl` (URL pública final, é ela que vai no `imageUrl` do
 produto/post). A `uploadUrl` expira em poucos minutos.
 
+### Users
+
+| Método | Rota | O que faz |
+|--------|------|-----------|
+| GET | `/users/{username}` | perfil público de um usuário (não precisa de login) |
+
+Modelo **guest browsing**: leitura de vitrine é pública, ação exige login. O `GET
+/users/{username}` é aberto e devolve o `UserPublicInfoDTO` (id, username e displayName —
+**sem email**); responde 404 se o username não existir. O `username` é validado no register por
+`^[a-z0-9._]{3,30}$` e é único (409 se repetir).
+
 ## Ainda falta
 
-- CRUD de perfil (`/users/me`, `/users/{id}`).
+- Perfil do próprio usuário (`GET /users/me`, com email) e busca (`GET /users?q=`).
