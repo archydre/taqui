@@ -23,13 +23,17 @@ Os GET são públicos (vitrine, sem login). Criar, atualizar e apagar precisam d
 | Método | Rota | O que faz |
 |--------|------|-----------|
 | POST | `/products` | cria um produto; o dono vem do token |
-| GET | `/products` | lista todos |
+| GET | `/products` | lista a vitrine, paginada e do mais novo pro mais antigo; `?owner={username}` filtra por vendedor |
 | GET | `/products/{productId}` | retorna um |
 | PUT | `/products/{productId}` | atualiza, só o dono |
 | DELETE | `/products/{productId}` | remove, só o dono |
 
 O corpo de criar e atualizar é o `ProductRequestDTO`: `productName`, `productDescription`,
 `price` e `imageUrl`. A resposta inclui o `owner` (id, username e displayName) e os timestamps.
+
+O `GET /products` é paginado (`?page`/`?size`, default 0/20) e devolve um `Page` (`content` +
+metadados), na ordem `createdAt` desc. Com `?owner={username}` lista só os produtos daquele
+vendedor; se o `username` não existir, responde 404.
 
 ### Posts
 
@@ -39,7 +43,7 @@ Os GET são públicos (vitrine, sem login). Criar, atualizar e apagar precisam d
 | Método | Rota | O que faz |
 |--------|------|-----------|
 | POST | `/posts` | cria um post; o dono vem do token |
-| GET | `/posts` | lista o feed, paginado e do mais novo pro mais antigo |
+| GET | `/posts` | lista o feed, paginado e do mais novo pro mais antigo; `?owner={username}` filtra por vendedor |
 | GET | `/posts/{postId}` | retorna um |
 | PUT | `/posts/{postId}` | atualiza, só o dono |
 | DELETE | `/posts/{postId}` | remove, só o dono |
@@ -57,6 +61,7 @@ A resposta (`PostResponseDTO`) inclui `owner` (id, username e displayName), o `p
 O `GET /posts` é paginado: aceita `?page` (default 0) e `?size` (default 20) e devolve um
 `Page` — os posts vêm em `content` e os metadados (`totalElements`, `totalPages`, `number`,
 `first`, `last`...) no mesmo objeto. A ordem é sempre do mais novo pro mais antigo (`createdAt` desc).
+Com `?owner={username}` lista só os posts daquele vendedor; se o `username` não existir, responde 404.
 
 Os erros usam o formato ProblemDetail (RFC 7807). Os códigos: 400 quando o corpo é
 inválido, 401 sem token ou token inválido, 403 quando você não é o dono, 404 quando o
