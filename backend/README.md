@@ -17,7 +17,8 @@ Rotas públicas.
 
 ### Products
 
-Todas precisam do header `Authorization: Bearer <jwt>`.
+Os GET são públicos (vitrine, sem login). Criar, atualizar e apagar precisam do header
+`Authorization: Bearer <jwt>`.
 
 | Método | Rota | O que faz |
 |--------|------|-----------|
@@ -32,7 +33,8 @@ O corpo de criar e atualizar é o `ProductRequestDTO`: `productName`, `productDe
 
 ### Posts
 
-Todas precisam do header `Authorization: Bearer <jwt>`.
+Os GET são públicos (vitrine, sem login). Criar, atualizar e apagar precisam do header
+`Authorization: Bearer <jwt>`.
 
 | Método | Rota | O que faz |
 |--------|------|-----------|
@@ -58,8 +60,34 @@ O `GET /posts` é paginado: aceita `?page` (default 0) e `?size` (default 20) e 
 
 Os erros usam o formato ProblemDetail (RFC 7807). Os códigos: 400 quando o corpo é
 inválido, 401 sem token ou token inválido, 403 quando você não é o dono, 404 quando o
-recurso não existe e 409 no register quando o email já está cadastrado.
+recurso não existe e 409 no register quando o email ou o username já está cadastrado.
 
-## Ainda falta
+### Uploads
 
-- CRUD de perfil (`/users/me`, `/users/{id}`).
+Precisa do header `Authorization: Bearer <jwt>`.
+
+| Método | Rota | O que faz |
+|--------|------|-----------|
+| POST | `/uploads` | gera uma URL pré-assinada pra subir uma imagem direto no R2 |
+
+O corpo é o `UploadRequestDTO`: `contentType` (só `image/png`, `image/jpeg` ou `image/webp`). A
+resposta (`UploadResponseDTO`) traz `uploadUrl` (URL pré-assinada — faça o `PUT` do arquivo nela
+com o mesmo `Content-Type`) e `publicUrl` (URL pública final, é ela que vai no `imageUrl` do
+produto/post). A `uploadUrl` expira em poucos minutos.
+
+### Users
+
+| Método | Rota | O que faz |
+|--------|------|-----------|
+| GET | `/users` | busca pública por username ou displayName, `?q=termo`, paginada |
+| GET | `/users/{username}` | perfil público de um usuário (não precisa de login) |
+| GET | `/users/me` | perfil do usuário logado, com email (precisa de login) |
+
+Modelo **guest browsing**: leitura de vitrine é pública, ação exige login. O `GET
+/users/{username}` é aberto e devolve o `UserPublicInfoDTO` (id, username e displayName —
+**sem email**); responde 404 se o username não existir. O `GET /users?q=termo` busca por
+`username` ou `displayName` (parcial, ignora maiúsculas) e devolve um `Page` de `UserPublicInfoDTO`
+(`?page`/`?size`); exige ao menos 2 caracteres no `q`, senão vem vazio. O `GET /users/me` exige
+token e devolve o `UserResponseDTO` (com email) do dono do token. O `username` é validado no
+register por
+`^[a-z0-9._]{3,30}$`, é único (409 se repetir) e alguns nomes são reservados (ex.: `me`, `admin`).
