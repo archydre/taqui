@@ -12,6 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
+import java.util.UUID;
+
 @RequiredArgsConstructor
 @Service
 public class UserService {
@@ -20,10 +23,16 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
+    private static final Set<String> RESERVED_USERNAMES =
+            Set.of("me", "admin", "root", "support", "api", "auth");
+
     @Transactional
     public User createUser(RegisterRequestDTO registerRequestDTO) {
         if(userRepository.existsByEmail(registerRequestDTO.email())) {
             throw new EmailAlreadyExistsException("Email já está sendo utilizado");
+        }
+        if(RESERVED_USERNAMES.contains(registerRequestDTO.username())) {
+            throw new UsernameAlreadyExistsException("Username indisponível");
         }
         if(userRepository.existsByUsername(registerRequestDTO.username())) {
             throw new UsernameAlreadyExistsException("Username já está sendo utilizado");
@@ -36,5 +45,10 @@ public class UserService {
     public User findUserByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado: " + username));
+    }
+
+    public User findUserById(UUID userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
     }
 }

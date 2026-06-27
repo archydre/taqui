@@ -78,11 +78,13 @@ produto/post). A `uploadUrl` expira em poucos minutos.
 | Método | Rota | O que faz |
 |--------|------|-----------|
 | GET | `/users/{username}` | perfil público de um usuário (não precisa de login) |
+| GET | `/users/me` | perfil do usuário logado, com email (precisa de login) |
 
 Modelo **guest browsing**: leitura de vitrine é pública, ação exige login. O `GET
 /users/{username}` é aberto e devolve o `UserPublicInfoDTO` (id, username e displayName —
-**sem email**); responde 404 se o username não existir. O `username` é validado no register por
-`^[a-z0-9._]{3,30}$` e é único (409 se repetir).
+**sem email**); responde 404 se o username não existir. O `GET /users/me` exige token e devolve o
+`UserResponseDTO` (com email) do dono do token. O `username` é validado no register por
+`^[a-z0-9._]{3,30}$`, é único (409 se repetir) e alguns nomes são reservados (ex.: `me`, `admin`).
 
 ## Ainda falta
 
