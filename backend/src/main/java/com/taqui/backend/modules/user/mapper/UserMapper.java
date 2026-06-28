@@ -15,5 +15,7 @@ public interface UserMapper {
 
     UserResponseDTO toResponse(User user);
 
+    @Mapping(target = "hasWhatsapp",
+            expression = "java(user.getWhatsapp() != null && !user.getWhatsapp().isBlank())")
     UserPublicInfoDTO toUserPublicInfo(User user);
 }

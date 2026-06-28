@@ -6,5 +6,6 @@ public record UserResponseDTO(
         UUID userId,
         String email,
         String username,
-        String displayName) {
+        String displayName,
+        String whatsapp) {
 }

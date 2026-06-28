@@ -7,13 +7,14 @@ import com.taqui.backend.modules.product.mapper.ProductMapper;
 import com.taqui.backend.modules.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -35,9 +36,12 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductResponseDTO>> findAllProducts() {
-        List<ProductResponseDTO> body = productService.findAllProducts().stream()
-                .map(productMapper::toResponseDTO).toList();
+    public ResponseEntity<Page<ProductResponseDTO>> findAllProducts(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String owner,
+            Pageable pageable) {
+        Page<ProductResponseDTO> body = productService.findAllProductsByOrderByCreatedAtDesc(q, owner, pageable)
+                .map(productMapper::toResponseDTO);
         return ResponseEntity.ok(body);
     }
 

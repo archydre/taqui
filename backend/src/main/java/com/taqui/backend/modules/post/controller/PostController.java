@@ -36,8 +36,10 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<PostResponseDTO>> findAllPosts(Pageable pageable) {
-        Page<PostResponseDTO> body = postService.findAllByOrderByCreatedAtDesc(pageable)
+    public ResponseEntity<Page<PostResponseDTO>> findAllPosts(
+            @RequestParam(required = false) String owner,
+            Pageable pageable) {
+        Page<PostResponseDTO> body = postService.findAllByOrderByCreatedAtDesc(owner, pageable)
                 .map(postMapper::toResponseDTO);
         return ResponseEntity.ok(body);
     }
