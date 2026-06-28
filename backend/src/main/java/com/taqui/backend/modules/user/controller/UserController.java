@@ -1,10 +1,13 @@
 package com.taqui.backend.modules.user.controller;
 
+import com.taqui.backend.modules.user.dto.UpdateMeRequestDTO;
 import com.taqui.backend.modules.user.dto.UserPublicInfoDTO;
 import com.taqui.backend.modules.user.dto.UserResponseDTO;
+import com.taqui.backend.modules.user.dto.WhatsappResponseDTO;
 import com.taqui.backend.modules.user.entity.User;
 import com.taqui.backend.modules.user.mapper.UserMapper;
 import com.taqui.backend.modules.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,9 +42,24 @@ public class UserController {
         return ResponseEntity.ok(userMapper.toResponse(user));
     }
 
+    @PutMapping("/me")
+    public ResponseEntity<UserResponseDTO> updateMe(
+            @Valid @RequestBody UpdateMeRequestDTO updateMeRequestDTO,
+            @AuthenticationPrincipal Jwt jwt) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        User user = userService.updateMe(userId, updateMeRequestDTO);
+        return ResponseEntity.ok(userMapper.toResponse(user));
+    }
+
     @GetMapping("/{username}")
     public ResponseEntity<UserPublicInfoDTO> getUserByUsername(@PathVariable String username) {
         User user = userService.findUserByUsername(username);
         return ResponseEntity.ok(userMapper.toUserPublicInfo(user));
+    }
+
+    @GetMapping("/{username}/whatsapp")
+    public ResponseEntity<WhatsappResponseDTO> getWhatsapp(@PathVariable String username) {
+        String whatsapp = userService.findWhatsappByUsername(username);
+        return ResponseEntity.ok(new WhatsappResponseDTO(username, whatsapp));
     }
 }

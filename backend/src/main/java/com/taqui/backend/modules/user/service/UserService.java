@@ -1,10 +1,12 @@
 package com.taqui.backend.modules.user.service;
 
 import com.taqui.backend.modules.user.dto.RegisterRequestDTO;
+import com.taqui.backend.modules.user.dto.UpdateMeRequestDTO;
 import com.taqui.backend.modules.user.mapper.UserMapper;
 import com.taqui.backend.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import com.taqui.backend.modules.user.entity.User;
+import com.taqui.backend.modules.user.exception.ContactUnavailableException;
 import com.taqui.backend.modules.user.exception.EmailAlreadyExistsException;
 import com.taqui.backend.modules.user.exception.UsernameAlreadyExistsException;
 import com.taqui.backend.modules.user.exception.UserNotFoundException;
@@ -52,6 +54,26 @@ public class UserService {
     public User findUserById(UUID userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
+    }
+
+    @Transactional
+    public User updateMe(UUID userId, UpdateMeRequestDTO updateMeRequestDTO) {
+        User user = findUserById(userId);
+        if (updateMeRequestDTO.whatsapp() != null) {
+            user.setWhatsapp(updateMeRequestDTO.whatsapp());
+        }
+        if (updateMeRequestDTO.displayName() != null) {
+            user.setDisplayName(updateMeRequestDTO.displayName());
+        }
+        return user;
+    }
+
+    public String findWhatsappByUsername(String username) {
+        User user = findUserByUsername(username);
+        if (user.getWhatsapp() == null || user.getWhatsapp().isBlank()) {
+            throw new ContactUnavailableException("Esse vendedor não tem WhatsApp cadastrado");
+        }
+        return user.getWhatsapp();
     }
 
     public Page<User> searchUsers(String query, Pageable pageable) {

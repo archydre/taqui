@@ -44,4 +44,7 @@ public class User {
     @NotBlank
     @Column(name = "display_name")
     private String displayName;
+
+    @Column(name = "whatsapp")
+    private String whatsapp;
 }

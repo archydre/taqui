@@ -5,5 +5,6 @@ import java.util.UUID;
 public record UserPublicInfoDTO(
         UUID userId,
         String username,
-        String displayName) {
+        String displayName,
+        boolean hasWhatsapp) {
 }

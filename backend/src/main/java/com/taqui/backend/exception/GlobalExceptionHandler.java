@@ -3,9 +3,11 @@ package com.taqui.backend.exception;
 import com.taqui.backend.modules.product.exception.ProductNotFoundException;
 import com.taqui.backend.modules.post.exception.InvalidPostException;
 import com.taqui.backend.modules.post.exception.PostNotFoundException;
+import com.taqui.backend.modules.user.exception.ContactUnavailableException;
 import com.taqui.backend.modules.user.exception.EmailAlreadyExistsException;
 import com.taqui.backend.modules.user.exception.UsernameAlreadyExistsException;
 import com.taqui.backend.modules.user.exception.UserNotFoundException;
+import com.taqui.backend.modules.user.exception.WhatsappRequiredException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
@@ -69,5 +71,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidPostException.class)
     public ProblemDetail handleInvalidPost(InvalidPostException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(WhatsappRequiredException.class)
+    public ProblemDetail handleWhatsappRequired(WhatsappRequiredException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
+    @ExceptionHandler(ContactUnavailableException.class)
+    public ProblemDetail handleContactUnavailable(ContactUnavailableException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 }
