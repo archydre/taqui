@@ -7,6 +7,7 @@ import com.taqui.backend.modules.product.mapper.ProductMapper;
 import com.taqui.backend.modules.product.repository.ProductRepository;
 import com.taqui.backend.modules.user.entity.User;
 import com.taqui.backend.modules.user.exception.UserNotFoundException;
+import com.taqui.backend.modules.user.exception.WhatsappRequiredException;
 import com.taqui.backend.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -44,8 +45,12 @@ public class ProductService {
 
     @Transactional
     public Product createProduct(ProductRequestDTO productRequestDTO, UUID ownerId) {
+        User owner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
+        if (owner.getWhatsapp() == null || owner.getWhatsapp().isBlank()) {
+            throw new WhatsappRequiredException("Cadastre seu WhatsApp para vender");
+        }
         Product product = productMapper.toEntity(productRequestDTO);
-        User owner = userRepository.getReferenceById(ownerId);
         product.setOwner(owner);
         return productRepository.save(product);
     }
