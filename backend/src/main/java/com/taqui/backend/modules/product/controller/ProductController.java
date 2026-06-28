@@ -37,9 +37,10 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<Page<ProductResponseDTO>> findAllProducts(
+            @RequestParam(required = false) String q,
             @RequestParam(required = false) String owner,
             Pageable pageable) {
-        Page<ProductResponseDTO> body = productService.findAllProductsByOrderByCreatedAtDesc(owner, pageable)
+        Page<ProductResponseDTO> body = productService.findAllProductsByOrderByCreatedAtDesc(q, owner, pageable)
                 .map(productMapper::toResponseDTO);
         return ResponseEntity.ok(body);
     }

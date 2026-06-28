@@ -27,7 +27,16 @@ public class ProductService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public Page<Product> findAllProductsByOrderByCreatedAtDesc(String owner, Pageable pageable) {
+    public Page<Product> findAllProductsByOrderByCreatedAtDesc(String q, String owner, Pageable pageable) {
+        if (q != null && !q.isBlank()) {
+            String term = q.trim();
+            if (term.length() < 2) {
+                return Page.empty(pageable);
+            }
+            return productRepository
+                    .findByProductNameContainingIgnoreCaseOrProductDescriptionContainingIgnoreCaseOrderByCreatedAtDesc(
+                            term, term, pageable);
+        }
         if (owner == null || owner.isBlank()) {
             return productRepository.findAllByOrderByCreatedAtDesc(pageable);
         }

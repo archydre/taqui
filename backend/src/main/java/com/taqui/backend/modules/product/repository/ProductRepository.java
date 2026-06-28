@@ -12,4 +12,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     Page<Product> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
     Page<Product> findByOwner_UsernameOrderByCreatedAtDesc(String username, Pageable pageable);
+
+    Page<Product> findByProductNameContainingIgnoreCaseOrProductDescriptionContainingIgnoreCaseOrderByCreatedAtDesc(
+            String productName, String productDescription, Pageable pageable);
 }
