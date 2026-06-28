@@ -1,5 +1,6 @@
 package com.taqui.backend.exception;
 
+import com.taqui.backend.modules.freight.exception.FreightUnavailableException;
 import com.taqui.backend.modules.product.exception.ProductNotFoundException;
 import com.taqui.backend.modules.post.exception.InvalidPostException;
 import com.taqui.backend.modules.post.exception.PostNotFoundException;
@@ -81,5 +82,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ContactUnavailableException.class)
     public ProblemDetail handleContactUnavailable(ContactUnavailableException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(FreightUnavailableException.class)
+    public ProblemDetail handleFreightUnavailable(FreightUnavailableException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
     }
 }

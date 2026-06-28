@@ -115,3 +115,35 @@ número fica no campo `whatsapp` do user (opcional no cadastro; só dígitos com
   o `UserResponseDTO` atualizado.
 - **Revelar o número:** `GET /users/{username}/whatsapp` (autenticado — guest leva 401) devolve
   `{ username, whatsapp }`; responde 404 se o usuário não existe ou não tem número cadastrado.
+
+### Frete (RabbitMQ)
+
+Integração com os **workers Python** em `services/` via **RabbitMQ RPC** (request/reply com
+`reply_to` + `correlation_id`). O broker é o CloudAMQP — configure a env `CLOUDAMQP_URL`
+(usada em `spring.rabbitmq.addresses`). O backend é o **cliente**: publica na fila do worker e
+espera a resposta; o worker (`services/Frete.py`) é quem consome e responde. Sem o worker rodando
+(ou sem `CLOUDAMQP_URL`), o endpoint responde **503**.
+
+Precisa do header `Authorization: Bearer <jwt>`.
+
+| Método | Rota | O que faz |
+|--------|------|-----------|
+| POST | `/freight/quote` | cota o frete de uma entrega nas transportadoras (Melhor Envio) |
+
+O corpo é o `FreightQuoteRequestDTO`: `fromPostalCode` e `toPostalCode` (CEP do remetente e do
+destinatário, **8 dígitos sem traço**) e `items` (lista, ao menos 1). Cada item: `width`, `height`,
+`length` (cm) e `weight` (kg) são obrigatórios; `insuranceValue` (R$, default 0) e `quantity`
+(default 1) são opcionais.
+
+A resposta é uma **lista** de `FreightOptionDTO`, já ordenada da mais barata pra mais cara, cada uma
+com `id`, `name` (serviço), `price`, `customPrice`, `deliveryTime` (dias) e `company` (`id`, `name`,
+`picture`). Erro do serviço de frete (worker fora do ar, timeout ou erro da API do Melhor Envio)
+vira **503** no formato ProblemDetail.
+
+A fila do worker é `freight.calculate.request` (durável, declarada pelo próprio worker). O timeout de
+resposta do backend é 20s (`spring.rabbitmq.template.reply-timeout`), maior que o timeout que o
+worker usa na API do Melhor Envio.
+
+> **Stateless por enquanto:** o endpoint não lê as dimensões do produto nem o CEP do vendedor do
+> banco — quem chama passa tudo no corpo. Guardar dimensões no `Product` e o CEP no `User` é um
+> passo seguinte (precisa de decisão de modelagem).
