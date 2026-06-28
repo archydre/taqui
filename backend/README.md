@@ -23,7 +23,7 @@ Os GET são públicos (vitrine, sem login). Criar, atualizar e apagar precisam d
 | Método | Rota | O que faz |
 |--------|------|-----------|
 | POST | `/products` | cria um produto; o dono vem do token (exige WhatsApp cadastrado) |
-| GET | `/products` | lista a vitrine, paginada e do mais novo pro mais antigo; `?owner={username}` filtra por vendedor |
+| GET | `/products` | lista a vitrine, paginada e do mais novo pro mais antigo; `?q=termo` busca, `?owner={username}` filtra por vendedor |
 | GET | `/products/{productId}` | retorna um |
 | PUT | `/products/{productId}` | atualiza, só o dono |
 | DELETE | `/products/{productId}` | remove, só o dono |
@@ -34,8 +34,10 @@ timestamps. **Pra criar produto o vendedor precisa ter WhatsApp cadastrado** —
 responde **422** ("Cadastre seu WhatsApp para vender"). Ver a seção Users.
 
 O `GET /products` é paginado (`?page`/`?size`, default 0/20) e devolve um `Page` (`content` +
-metadados), na ordem `createdAt` desc. Com `?owner={username}` lista só os produtos daquele
-vendedor; se o `username` não existir, responde 404.
+metadados), na ordem `createdAt` desc. Com `?q=termo` busca produtos por nome ou descrição (parcial,
+ignora maiúsculas; exige ao menos 2 caracteres, senão vem vazio). Com `?owner={username}` lista só os
+produtos daquele vendedor; se o `username` não existir, responde 404. O `q` tem precedência sobre o
+`owner`.
 
 ### Posts
 
