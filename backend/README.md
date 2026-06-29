@@ -165,6 +165,8 @@ sem carrinho. Todas as rotas precisam do header `Authorization: Bearer <jwt>`.
 | GET | `/orders/received` | pedidos recebidos como vendedor, paginado |
 | GET | `/orders/{orderId}` | um pedido (só o comprador ou o vendedor dele) |
 | POST | `/orders/{orderId}/confirm-payment` | o vendedor confirma o Pix recebido |
+| POST | `/orders/{orderId}/ship` | o vendedor marca como enviado (só se já `PAGO`) |
+| POST | `/orders/{orderId}/cancel` | comprador ou vendedor cancela (enquanto não enviado) |
 
 O corpo de criar é o `OrderRequestDTO`: `productId`, `quantity` (≥ 1), `freightService` (nome da
 opção de frete escolhida no `/freight/quote`), `freightPrice` (preço dela) e `address`

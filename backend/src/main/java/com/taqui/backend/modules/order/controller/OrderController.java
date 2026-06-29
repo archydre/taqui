@@ -72,4 +72,22 @@ public class OrderController {
         Order order = orderService.confirmPayment(orderId, sellerId);
         return ResponseEntity.ok(orderMapper.toResponseDTO(order));
     }
+
+    @PostMapping("/{orderId}/ship")
+    public ResponseEntity<OrderResponseDTO> shipOrder(
+            @PathVariable UUID orderId,
+            @AuthenticationPrincipal Jwt jwt) {
+        UUID sellerId = UUID.fromString(jwt.getSubject());
+        Order order = orderService.shipOrder(orderId, sellerId);
+        return ResponseEntity.ok(orderMapper.toResponseDTO(order));
+    }
+
+    @PostMapping("/{orderId}/cancel")
+    public ResponseEntity<OrderResponseDTO> cancelOrder(
+            @PathVariable UUID orderId,
+            @AuthenticationPrincipal Jwt jwt) {
+        UUID currentUserId = UUID.fromString(jwt.getSubject());
+        Order order = orderService.cancelOrder(orderId, currentUserId);
+        return ResponseEntity.ok(orderMapper.toResponseDTO(order));
+    }
 }

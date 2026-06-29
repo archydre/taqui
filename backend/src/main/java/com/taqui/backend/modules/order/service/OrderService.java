@@ -94,6 +94,32 @@ public class OrderService {
         return order;
     }
 
+    @Transactional
+    public Order shipOrder(UUID orderId, UUID sellerId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Pedido não encontrado: " + orderId));
+        if (!order.getProduct().getOwner().getUserId().equals(sellerId)) {
+            throw new AccessDeniedException("Apenas o vendedor pode enviar o pedido");
+        }
+        if (order.getStatus() != OrderStatus.PAGO) {
+            throw new InvalidOrderStateException("Só dá pra enviar um pedido pago");
+        }
+        order.setStatus(OrderStatus.ENVIADO);
+        return order;
+    }
+
+    @Transactional
+    public Order cancelOrder(UUID orderId, UUID currentUserId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Pedido não encontrado: " + orderId));
+        checkParticipant(order, currentUserId);
+        if (order.getStatus() == OrderStatus.ENVIADO || order.getStatus() == OrderStatus.CANCELADO) {
+            throw new InvalidOrderStateException("Pedido não pode mais ser cancelado");
+        }
+        order.setStatus(OrderStatus.CANCELADO);
+        return order;
+    }
+
     private void checkParticipant(Order order, UUID userId) {
         boolean isBuyer = order.getBuyer().getUserId().equals(userId);
         boolean isSeller = order.getProduct().getOwner().getUserId().equals(userId);

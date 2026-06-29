@@ -193,4 +193,89 @@ class OrderControllerIT extends AbstractIntegrationTest {
         mockMvc.perform(post("/orders/" + order.getOrderId() + "/confirm-payment").with(authAs(vendedor)))
                 .andExpect(status().isConflict());
     }
+
+    // ---- enviar (ship) ----
+
+    @Test
+    void enviar_vendedor_pedidoPago_marcaEnviado() throws Exception {
+        User vendedor = givenUser("vendedor", "5584999998888");
+        User comprador = givenUser("comprador", "5584999990000");
+        Product product = givenProduct(vendedor, "Caneca Azul", "ceramica");
+        Order order = givenOrder(comprador, product, OrderStatus.PAGO);
+
+        mockMvc.perform(post("/orders/" + order.getOrderId() + "/ship").with(authAs(vendedor)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ENVIADO"));
+    }
+
+    @Test
+    void enviar_pedidoNaoPago_retorna409() throws Exception {
+        User vendedor = givenUser("vendedor", "5584999998888");
+        User comprador = givenUser("comprador", "5584999990000");
+        Product product = givenProduct(vendedor, "Caneca Azul", "ceramica");
+        Order order = givenOrder(comprador, product, OrderStatus.AGUARDANDO_PAGAMENTO);
+
+        mockMvc.perform(post("/orders/" + order.getOrderId() + "/ship").with(authAs(vendedor)))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void enviar_naoVendedor_retorna403() throws Exception {
+        User vendedor = givenUser("vendedor", "5584999998888");
+        User comprador = givenUser("comprador", "5584999990000");
+        Product product = givenProduct(vendedor, "Caneca Azul", "ceramica");
+        Order order = givenOrder(comprador, product, OrderStatus.PAGO);
+
+        mockMvc.perform(post("/orders/" + order.getOrderId() + "/ship").with(authAs(comprador)))
+                .andExpect(status().isForbidden());
+    }
+
+    // ---- cancelar ----
+
+    @Test
+    void cancelar_comprador_marcaCancelado() throws Exception {
+        User vendedor = givenUser("vendedor", "5584999998888");
+        User comprador = givenUser("comprador", "5584999990000");
+        Product product = givenProduct(vendedor, "Caneca Azul", "ceramica");
+        Order order = givenOrder(comprador, product, OrderStatus.AGUARDANDO_PAGAMENTO);
+
+        mockMvc.perform(post("/orders/" + order.getOrderId() + "/cancel").with(authAs(comprador)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELADO"));
+    }
+
+    @Test
+    void cancelar_vendedor_tambemPode() throws Exception {
+        User vendedor = givenUser("vendedor", "5584999998888");
+        User comprador = givenUser("comprador", "5584999990000");
+        Product product = givenProduct(vendedor, "Caneca Azul", "ceramica");
+        Order order = givenOrder(comprador, product, OrderStatus.PAGO);
+
+        mockMvc.perform(post("/orders/" + order.getOrderId() + "/cancel").with(authAs(vendedor)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELADO"));
+    }
+
+    @Test
+    void cancelar_pedidoEnviado_retorna409() throws Exception {
+        User vendedor = givenUser("vendedor", "5584999998888");
+        User comprador = givenUser("comprador", "5584999990000");
+        Product product = givenProduct(vendedor, "Caneca Azul", "ceramica");
+        Order order = givenOrder(comprador, product, OrderStatus.ENVIADO);
+
+        mockMvc.perform(post("/orders/" + order.getOrderId() + "/cancel").with(authAs(comprador)))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void cancelar_naoParticipante_retorna403() throws Exception {
+        User vendedor = givenUser("vendedor", "5584999998888");
+        User comprador = givenUser("comprador", "5584999990000");
+        User terceiro = givenUser("terceiro", "5584999993333");
+        Product product = givenProduct(vendedor, "Caneca Azul", "ceramica");
+        Order order = givenOrder(comprador, product, OrderStatus.AGUARDANDO_PAGAMENTO);
+
+        mockMvc.perform(post("/orders/" + order.getOrderId() + "/cancel").with(authAs(terceiro)))
+                .andExpect(status().isForbidden());
+    }
 }
