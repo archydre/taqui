@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  --color-canvas: #f6f4f0;
+  --color-canvas: #f4efe4;
   --color-surface: #ffffff;
-  --color-ink: #14110f;
-  --color-ink-soft: #6b6560;
-  --color-line: #e7e3dc;
-  --color-action: #f26b1d;
-  --color-action-strong: #d2570f;
+  --color-ink: #1e2d44;
+  --color-ink-soft: #5e6675;
+  --color-line: #e6e1d6;
+  --color-action: #2f6db3;
+  --color-action-strong: #245a95;
   --color-price: #1b8a5a;
 
   --font-display: var(--font-sora);

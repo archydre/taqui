@@ -39,7 +39,7 @@ export function SideRail() {
         href="/"
         title="taqui"
         aria-label="taqui — início"
-        className="mb-4 grid h-10 w-10 place-items-center rounded-xl bg-action font-display text-lg font-bold text-white"
+        className="mb-4 grid h-10 w-10 place-items-center rounded-xl bg-ink font-display text-lg font-bold text-white"
       >
         t
       </Link>
