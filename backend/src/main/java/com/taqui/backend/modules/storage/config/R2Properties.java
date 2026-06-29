@@ -9,7 +9,6 @@ public record R2Properties(
         String secretAccessKey,
         String bucket,
         String region,
-        String publicBaseUrl,
-        long presignExpiryMinutes
+        String publicBaseUrl
 ) {
 }

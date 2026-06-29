@@ -78,12 +78,21 @@ Precisa do header `Authorization: Bearer <jwt>`.
 
 | Método | Rota | O que faz |
 |--------|------|-----------|
-| POST | `/uploads` | gera uma URL pré-assinada pra subir uma imagem direto no R2 |
+| POST | `/uploads` | sobe uma imagem (proxy): guarda o original no R2 e gera um thumbnail 400×400 |
 
-O corpo é o `UploadRequestDTO`: `contentType` (só `image/png`, `image/jpeg` ou `image/webp`). A
-resposta (`UploadResponseDTO`) traz `uploadUrl` (URL pré-assinada — faça o `PUT` do arquivo nela
-com o mesmo `Content-Type`) e `publicUrl` (URL pública final, é ela que vai no `imageUrl` do
-produto/post). A `uploadUrl` expira em poucos minutos.
+Envie como **`multipart/form-data`** com o campo **`file`** (a imagem). Os tipos aceitos são
+`image/png`, `image/jpeg` e `image/webp`, e o tamanho máximo é **5 MB** por arquivo
+(`spring.servlet.multipart.max-file-size`). O backend faz o **proxy** do upload — recebe os bytes,
+gera o thumbnail e sobe os dois no R2 (não há mais URL pré-assinada).
+
+O thumbnail (400×400, center-crop, JPEG) é gerado pelo **worker Python** `services/Padrao-Img.py`
+via RabbitMQ RPC (fila `image.resize.request`), igual ao frete — sem o worker (ou sem
+`CLOUDAMQP_URL`) o endpoint responde **503**.
+
+A resposta (`UploadResponseDTO`) traz `imageUrl` (URL pública do original) e `thumbnailUrl` (URL
+pública do thumbnail): use o original no detalhe do produto/post e o thumbnail na vitrine/feed.
+Erros (ProblemDetail): **400** arquivo vazio ou content-type inválido, **401** sem token e **503**
+se o worker de imagem estiver indisponível.
 
 ### Users
 
