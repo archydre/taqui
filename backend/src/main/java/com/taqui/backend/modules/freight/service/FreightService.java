@@ -6,6 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.taqui.backend.modules.freight.dto.FreightOptionDTO;
 import com.taqui.backend.modules.freight.dto.FreightQuoteRequestDTO;
 import com.taqui.backend.modules.freight.exception.FreightUnavailableException;
+import com.taqui.backend.modules.freight.exception.IncompleteFreightDataException;
+import com.taqui.backend.modules.product.entity.Product;
+import com.taqui.backend.modules.product.service.ProductService;
+import com.taqui.backend.modules.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.Message;
@@ -16,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
@@ -26,6 +31,7 @@ public class FreightService {
 
     private final RabbitTemplate rabbitTemplate;
     private final ObjectMapper objectMapper;
+    private final ProductService productService;
 
     public List<FreightOptionDTO> quote(FreightQuoteRequestDTO request) {
         Message reply = call(toWorkerRequest(request));
@@ -39,6 +45,30 @@ public class FreightService {
         } catch (IOException ex) {
             throw new FreightUnavailableException("Resposta inválida do serviço de frete");
         }
+    }
+
+    public List<FreightOptionDTO> quoteForProduct(UUID productId, String toPostalCode, Integer quantity) {
+        Product product = productService.findProductById(productId);
+        User seller = product.getOwner();
+
+        if (seller.getPostalCode() == null || seller.getPostalCode().isBlank()) {
+            throw new IncompleteFreightDataException("O vendedor não cadastrou o CEP de origem");
+        }
+        if (product.getWeight() == null || product.getWidth() == null
+                || product.getHeight() == null || product.getLength() == null) {
+            throw new IncompleteFreightDataException("O produto não tem dimensões cadastradas");
+        }
+
+        FreightQuoteRequestDTO.Item item = new FreightQuoteRequestDTO.Item(
+                product.getWidth().intValue(),
+                product.getHeight().intValue(),
+                product.getLength().intValue(),
+                product.getWeight().doubleValue(),
+                product.getPrice().doubleValue(),
+                quantity != null ? quantity : 1);
+        FreightQuoteRequestDTO request = new FreightQuoteRequestDTO(
+                seller.getPostalCode(), toPostalCode, List.of(item));
+        return quote(request);
     }
 
     private Message call(WorkerRequest workerRequest) {

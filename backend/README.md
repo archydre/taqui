@@ -132,6 +132,7 @@ Precisa do header `Authorization: Bearer <jwt>`.
 | Método | Rota | O que faz |
 |--------|------|-----------|
 | POST | `/freight/quote` | cota o frete de uma entrega nas transportadoras (Melhor Envio) |
+| POST | `/freight/quote/product/{productId}` | cota o frete de um produto usando as dimensões dele + o CEP do vendedor (o comprador só passa o CEP de destino) |
 
 O corpo é o `FreightQuoteRequestDTO`: `fromPostalCode` e `toPostalCode` (CEP do remetente e do
 destinatário, **8 dígitos sem traço**) e `items` (lista, ao menos 1). Cada item: `width`, `height`,
@@ -147,9 +148,11 @@ A fila do worker é `freight.calculate.request` (durável, declarada pelo própr
 resposta do backend é 20s (`spring.rabbitmq.template.reply-timeout`), maior que o timeout que o
 worker usa na API do Melhor Envio.
 
-> **Stateless por enquanto:** o endpoint não lê as dimensões do produto nem o CEP do vendedor do
-> banco — quem chama passa tudo no corpo. Guardar dimensões no `Product` e o CEP no `User` é um
-> passo seguinte (precisa de decisão de modelagem).
+> **Dois modos:** o `/freight/quote` é stateless (quem chama passa CEPs + dimensões no corpo). Já o
+> `/freight/quote/product/{productId}` lê as dimensões do produto e o CEP de origem do vendedor do
+> banco — o comprador só manda o CEP de destino (e a quantidade), e o CEP do vendedor não vaza.
+> Corpo: `ProductFreightQuoteRequestDTO` (`toPostalCode`, `quantity` opcional). Responde **422** se o
+> produto está sem dimensões ou o vendedor sem CEP cadastrado.
 
 ### Pedidos (Orders)
 

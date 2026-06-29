@@ -1,6 +1,7 @@
 package com.taqui.backend.exception;
 
 import com.taqui.backend.modules.freight.exception.FreightUnavailableException;
+import com.taqui.backend.modules.freight.exception.IncompleteFreightDataException;
 import com.taqui.backend.modules.order.exception.InvalidOrderStateException;
 import com.taqui.backend.modules.order.exception.OrderNotFoundException;
 import com.taqui.backend.modules.product.exception.ProductNotFoundException;
@@ -90,6 +91,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(FreightUnavailableException.class)
     public ProblemDetail handleFreightUnavailable(FreightUnavailableException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
+    }
+
+    @ExceptionHandler(IncompleteFreightDataException.class)
+    public ProblemDetail handleIncompleteFreightData(IncompleteFreightDataException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
     }
 
     @ExceptionHandler(OrderNotFoundException.class)
