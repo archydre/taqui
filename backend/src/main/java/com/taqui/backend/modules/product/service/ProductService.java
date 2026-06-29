@@ -6,6 +6,7 @@ import com.taqui.backend.modules.product.exception.ProductNotFoundException;
 import com.taqui.backend.modules.product.mapper.ProductMapper;
 import com.taqui.backend.modules.product.repository.ProductRepository;
 import com.taqui.backend.modules.user.entity.User;
+import com.taqui.backend.modules.user.exception.PixKeyRequiredException;
 import com.taqui.backend.modules.user.exception.UserNotFoundException;
 import com.taqui.backend.modules.user.exception.WhatsappRequiredException;
 import com.taqui.backend.modules.user.repository.UserRepository;
@@ -58,6 +59,9 @@ public class ProductService {
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
         if (owner.getWhatsapp() == null || owner.getWhatsapp().isBlank()) {
             throw new WhatsappRequiredException("Cadastre seu WhatsApp para vender");
+        }
+        if (owner.getPixKey() == null || owner.getPixKey().isBlank()) {
+            throw new PixKeyRequiredException("Cadastre sua chave Pix para vender");
         }
         Product product = productMapper.toEntity(productRequestDTO);
         product.setOwner(owner);

@@ -36,6 +36,15 @@ class ProductControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void criar_semPix_retorna422() throws Exception {
+        User user = givenUser("joao", "5584999998888", null); // com whatsapp, sem pix
+
+        mockMvc.perform(post("/products").with(authAs(user))
+                        .contentType("application/json").content(CANECA))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
     void criar_comWhatsapp_retorna201() throws Exception {
         User user = givenUser("joao", "5584999998888");
 
@@ -45,6 +54,20 @@ class ProductControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.productName").value("Caneca Azul"))
                 .andExpect(jsonPath("$.owner.username").value("joao"))
                 .andExpect(jsonPath("$.owner.hasWhatsapp").value(true));
+    }
+
+    @Test
+    void criar_comDimensoes_retornaNaResposta() throws Exception {
+        User user = givenUser("joao", "5584999998888");
+
+        mockMvc.perform(post("/products").with(authAs(user))
+                        .contentType("application/json")
+                        .content("""
+                                {"productName":"Caneca","price":25.0,"weight":0.3,"width":10,"height":12,"length":8}
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.weight").value(0.3))
+                .andExpect(jsonPath("$.width").value(10));
     }
 
     @Test

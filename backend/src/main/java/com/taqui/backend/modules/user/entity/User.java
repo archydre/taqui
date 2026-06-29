@@ -47,4 +47,10 @@ public class User {
 
     @Column(name = "whatsapp")
     private String whatsapp;
+
+    @Column(name = "pix_key")
+    private String pixKey;
+
+    @Column(name = "postal_code")
+    private String postalCode;
 }

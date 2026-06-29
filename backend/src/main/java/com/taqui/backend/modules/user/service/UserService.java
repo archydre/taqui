@@ -65,6 +65,12 @@ public class UserService {
         if (updateMeRequestDTO.displayName() != null) {
             user.setDisplayName(updateMeRequestDTO.displayName());
         }
+        if (updateMeRequestDTO.pixKey() != null) {
+            user.setPixKey(updateMeRequestDTO.pixKey());
+        }
+        if (updateMeRequestDTO.postalCode() != null) {
+            user.setPostalCode(updateMeRequestDTO.postalCode());
+        }
         return user;
     }
 

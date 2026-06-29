@@ -38,6 +38,18 @@ public class Product {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(name = "weight")
+    private BigDecimal weight;
+
+    @Column(name = "width")
+    private BigDecimal width;
+
+    @Column(name = "height")
+    private BigDecimal height;
+
+    @Column(name = "length")
+    private BigDecimal length;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;

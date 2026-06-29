@@ -1,10 +1,16 @@
 package com.taqui.backend.exception;
 
+import com.taqui.backend.modules.freight.exception.FreightUnavailableException;
+import com.taqui.backend.modules.freight.exception.IncompleteFreightDataException;
+import com.taqui.backend.modules.order.exception.InvalidOrderStateException;
+import com.taqui.backend.modules.order.exception.OrderNotFoundException;
+import com.taqui.backend.modules.order.exception.SelfPurchaseException;
 import com.taqui.backend.modules.product.exception.ProductNotFoundException;
 import com.taqui.backend.modules.post.exception.InvalidPostException;
 import com.taqui.backend.modules.post.exception.PostNotFoundException;
 import com.taqui.backend.modules.user.exception.ContactUnavailableException;
 import com.taqui.backend.modules.user.exception.EmailAlreadyExistsException;
+import com.taqui.backend.modules.user.exception.PixKeyRequiredException;
 import com.taqui.backend.modules.user.exception.UsernameAlreadyExistsException;
 import com.taqui.backend.modules.user.exception.UserNotFoundException;
 import com.taqui.backend.modules.user.exception.WhatsappRequiredException;
@@ -81,5 +87,35 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ContactUnavailableException.class)
     public ProblemDetail handleContactUnavailable(ContactUnavailableException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(FreightUnavailableException.class)
+    public ProblemDetail handleFreightUnavailable(FreightUnavailableException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
+    }
+
+    @ExceptionHandler(IncompleteFreightDataException.class)
+    public ProblemDetail handleIncompleteFreightData(IncompleteFreightDataException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ProblemDetail handleOrderNotFound(OrderNotFoundException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidOrderStateException.class)
+    public ProblemDetail handleInvalidOrderState(InvalidOrderStateException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(SelfPurchaseException.class)
+    public ProblemDetail handleSelfPurchase(SelfPurchaseException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(PixKeyRequiredException.class)
+    public ProblemDetail handlePixKeyRequired(PixKeyRequiredException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
     }
 }
