@@ -1,0 +1,7 @@
+# Segredos locais (R2, CloudAMQP, etc.) — NUNCA commitar
+.env
+.env.*
+!.env.example
+
+# IntelliJ (raiz do monorepo)
+.idea/
