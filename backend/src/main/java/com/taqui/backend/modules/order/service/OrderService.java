@@ -5,6 +5,7 @@ import com.taqui.backend.modules.order.entity.Order;
 import com.taqui.backend.modules.order.entity.OrderStatus;
 import com.taqui.backend.modules.order.exception.InvalidOrderStateException;
 import com.taqui.backend.modules.order.exception.OrderNotFoundException;
+import com.taqui.backend.modules.order.exception.SelfPurchaseException;
 import com.taqui.backend.modules.order.mapper.OrderMapper;
 import com.taqui.backend.modules.order.repository.OrderRepository;
 import com.taqui.backend.modules.product.entity.Product;
@@ -38,6 +39,10 @@ public class OrderService {
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
         Product product = productService.findProductById(dto.productId());
         User seller = product.getOwner();
+
+        if (seller.getUserId().equals(buyerId)) {
+            throw new SelfPurchaseException("Você não pode comprar seu próprio produto");
+        }
 
         if (seller.getPixKey() == null || seller.getPixKey().isBlank()) {
             throw new PixKeyRequiredException("O vendedor ainda não configurou o Pix");

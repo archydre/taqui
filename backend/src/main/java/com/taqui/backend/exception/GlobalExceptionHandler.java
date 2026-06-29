@@ -4,6 +4,7 @@ import com.taqui.backend.modules.freight.exception.FreightUnavailableException;
 import com.taqui.backend.modules.freight.exception.IncompleteFreightDataException;
 import com.taqui.backend.modules.order.exception.InvalidOrderStateException;
 import com.taqui.backend.modules.order.exception.OrderNotFoundException;
+import com.taqui.backend.modules.order.exception.SelfPurchaseException;
 import com.taqui.backend.modules.product.exception.ProductNotFoundException;
 import com.taqui.backend.modules.post.exception.InvalidPostException;
 import com.taqui.backend.modules.post.exception.PostNotFoundException;
@@ -105,6 +106,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidOrderStateException.class)
     public ProblemDetail handleInvalidOrderState(InvalidOrderStateException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(SelfPurchaseException.class)
+    public ProblemDetail handleSelfPurchase(SelfPurchaseException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     }
 

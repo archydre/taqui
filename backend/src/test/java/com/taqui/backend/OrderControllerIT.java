@@ -99,6 +99,16 @@ class OrderControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isUnprocessableEntity());
     }
 
+    @Test
+    void criar_proprioProduto_retorna409() throws Exception {
+        User vendedor = givenUser("vendedor", "5584999998888");
+        Product product = givenProduct(vendedor, "Caneca Azul", "ceramica");
+
+        mockMvc.perform(post("/orders").with(authAs(vendedor))
+                        .contentType("application/json").content(orderBody(product.getProductId())))
+                .andExpect(status().isConflict());
+    }
+
     // ---- listagens ----
 
     @Test

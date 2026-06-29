@@ -185,5 +185,5 @@ comprador paga no Pix mostrado e o vendedor chama o `confirm-payment` pra marcar
 A resposta (`OrderResponseDTO`) traz o `buyer` (público), o `product` aninhado (com o vendedor), os
 snapshots, o `sellerPixKey`, o `address`, o `status` e os timestamps. Erros (ProblemDetail): **404**
 produto ou pedido inexistente, **403** se você não é participante do pedido (no GET) ou não é o
-vendedor (no confirm), **409** ao confirmar um pedido que não está `AGUARDANDO_PAGAMENTO`, **422** se
+vendedor (no confirm), **409** ao confirmar um pedido que não está `AGUARDANDO_PAGAMENTO` ou ao comprar o próprio produto, **422** se
 o vendedor não tem Pix cadastrado, **400** na validação do corpo.
