@@ -3,9 +3,14 @@ import Link from "next/link";
 export function Brand() {
   return (
     <Link href="/" className="flex shrink-0 items-center gap-2">
-      <span className="grid h-9 w-9 place-items-center rounded-xl bg-ink font-display text-lg font-bold text-white">
-        t
-      </span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/taqui_logo.jpg"
+        alt="taqui"
+        width={36}
+        height={36}
+        className="h-9 w-9 rounded-xl object-cover"
+      />
       <span className="font-display text-xl font-semibold tracking-tight text-ink">
         taqui
       </span>

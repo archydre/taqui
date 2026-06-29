@@ -39,9 +39,16 @@ export function SideRail() {
         href="/"
         title="taqui"
         aria-label="taqui — início"
-        className="mb-4 grid h-10 w-10 place-items-center rounded-xl bg-ink font-display text-lg font-bold text-white"
+        className="mb-4 block"
       >
-        t
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/taqui_logo.jpg"
+          alt="taqui"
+          width={40}
+          height={40}
+          className="h-10 w-10 rounded-xl object-cover"
+        />
       </Link>
 
       {items.map(({ label, href, icon: Icon, active }) => (
