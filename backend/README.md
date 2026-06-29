@@ -29,7 +29,7 @@ Os GET são públicos (vitrine, sem login). Criar, atualizar e apagar precisam d
 | DELETE | `/products/{productId}` | remove, só o dono |
 
 O corpo de criar e atualizar é o `ProductRequestDTO`: `productName`, `productDescription`,
-`price`, `imageUrl` e as dimensões pro frete (`weight` em kg, `width`/`height`/`length` em cm — todas opcionais). A resposta inclui o `owner` (id, username, displayName e `hasWhatsapp`) e os
+`price`, `imageUrl`, `thumbnailUrl` e as dimensões pro frete (`weight` em kg, `width`/`height`/`length` em cm — todas opcionais). O `imageUrl` é a imagem original e o `thumbnailUrl` o thumb 400×400 — ambos vêm do `POST /uploads` (o front manda os dois; use o thumb na vitrine e o original no detalhe). A resposta inclui o `owner` (id, username, displayName e `hasWhatsapp`) e os
 timestamps. **Pra criar produto o vendedor precisa ter WhatsApp e chave Pix cadastrados** — sem
 WhatsApp ou sem Pix, o `POST` responde **422** ("Cadastre seu WhatsApp para vender" / "Cadastre sua
 chave Pix para vender"). Ver a seção Users.
@@ -54,14 +54,14 @@ Os GET são públicos (vitrine, sem login). Criar, atualizar e apagar precisam d
 | DELETE | `/posts/{postId}` | remove, só o dono |
 
 Há dois tipos, definidos por enviar ou não `productId` no corpo (`content`, `imageUrl`,
-`productId`):
+`thumbnailUrl`, `productId`):
 
 - **anúncio** — `productId` aponta pra um produto **seu** (senão 403); a resposta traz o
   produto aninhado e `type: "ANUNCIO"`.
 - **comum** — sem `productId`; precisa de `content` ou `imageUrl`, senão 400 (`type: "COMUM"`).
 
 A resposta (`PostResponseDTO`) inclui `owner` (id, username e displayName), o `product`
-(null no post comum) e os timestamps.
+(null no post comum), o `imageUrl`/`thumbnailUrl` (do post comum) e os timestamps.
 
 O `GET /posts` é paginado: aceita `?page` (default 0) e `?size` (default 20) e devolve um
 `Page` — os posts vêm em `content` e os metadados (`totalElements`, `totalPages`, `number`,

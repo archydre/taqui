@@ -9,6 +9,7 @@ public record ProductRequestDTO(
         @Size(max = 500) String productDescription,
         @NotNull @Positive @Digits(integer = 10, fraction = 2) BigDecimal price,
         String imageUrl,
+        String thumbnailUrl,
         @Positive BigDecimal weight,
         @Positive BigDecimal width,
         @Positive BigDecimal height,

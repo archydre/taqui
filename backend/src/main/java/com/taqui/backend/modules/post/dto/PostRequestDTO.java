@@ -7,5 +7,6 @@ import java.util.UUID;
 public record PostRequestDTO(
         @Size(max = 1000) String content,
         String imageUrl,
+        String thumbnailUrl,
         UUID productId
 ) {}

@@ -10,6 +10,7 @@ public record PostResponseDTO(
         UUID postId,
         String content,
         String imageUrl,
+        String thumbnailUrl,
         ProductResponseDTO product,
         String type,
         UserPublicInfoDTO owner,

@@ -33,6 +33,9 @@ public class Post {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(name = "thumbnail_url")
+    private String thumbnailUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
