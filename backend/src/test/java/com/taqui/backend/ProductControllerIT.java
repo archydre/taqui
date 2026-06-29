@@ -36,6 +36,15 @@ class ProductControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void criar_semPix_retorna422() throws Exception {
+        User user = givenUser("joao", "5584999998888", null); // com whatsapp, sem pix
+
+        mockMvc.perform(post("/products").with(authAs(user))
+                        .contentType("application/json").content(CANECA))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
     void criar_comWhatsapp_retorna201() throws Exception {
         User user = givenUser("joao", "5584999998888");
 

@@ -1,6 +1,10 @@
 package com.taqui.backend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.taqui.backend.modules.order.entity.Address;
+import com.taqui.backend.modules.order.entity.Order;
+import com.taqui.backend.modules.order.entity.OrderStatus;
+import com.taqui.backend.modules.order.repository.OrderRepository;
 import com.taqui.backend.modules.post.repository.PostRepository;
 import com.taqui.backend.modules.product.entity.Product;
 import com.taqui.backend.modules.product.repository.ProductRepository;
@@ -52,23 +56,31 @@ public abstract class AbstractIntegrationTest {
     @Autowired protected UserRepository userRepository;
     @Autowired protected ProductRepository productRepository;
     @Autowired protected PostRepository postRepository;
+    @Autowired protected OrderRepository orderRepository;
     @Autowired protected PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void cleanDatabase() {
+        orderRepository.deleteAll();
         postRepository.deleteAll();
         productRepository.deleteAll();
         userRepository.deleteAll();
     }
 
-    /** Persiste um usuário direto no banco (senha "senha12345" já encodada). */
+    /** Persiste um usuário direto no banco (senha "senha12345" já encodada), com chave Pix default. */
     protected User givenUser(String username, String whatsapp) {
+        return givenUser(username, whatsapp, "chave-pix-teste");
+    }
+
+    /** Persiste um usuário direto no banco com whatsapp e chave Pix explícitos. */
+    protected User givenUser(String username, String whatsapp, String pixKey) {
         User user = new User();
         user.setEmail(username + "@test.com");
         user.setUsername(username);
         user.setDisplayName(username);
         user.setPassword(passwordEncoder.encode("senha12345"));
         user.setWhatsapp(whatsapp);
+        user.setPixKey(pixKey);
         return userRepository.save(user);
     }
 
@@ -80,6 +92,31 @@ public abstract class AbstractIntegrationTest {
         product.setPrice(BigDecimal.valueOf(20));
         product.setOwner(owner);
         return productRepository.save(product);
+    }
+
+    /** Persiste um pedido de um comprador pra um produto, com os snapshots e o status dados. */
+    protected Order givenOrder(User buyer, Product product, OrderStatus status) {
+        Address address = new Address();
+        address.setRecipientName("Maria Compradora");
+        address.setPostalCode("59600000");
+        address.setStreet("Rua das Flores");
+        address.setNumber("100");
+        address.setDistrict("Centro");
+        address.setCity("Mossoró");
+        address.setState("RN");
+
+        Order order = new Order();
+        order.setBuyer(buyer);
+        order.setProduct(product);
+        order.setQuantity(1);
+        order.setUnitPrice(product.getPrice());
+        order.setFreightService("SEDEX");
+        order.setFreightPrice(BigDecimal.valueOf(15));
+        order.setTotal(product.getPrice().add(BigDecimal.valueOf(15)));
+        order.setSellerPixKey(product.getOwner().getPixKey());
+        order.setAddress(address);
+        order.setStatus(status);
+        return orderRepository.save(order);
     }
 
     /** Forja um request autenticado como o usuário (só o claim sub = userId, que os controllers leem). */

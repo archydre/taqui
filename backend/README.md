@@ -22,7 +22,7 @@ Os GET são públicos (vitrine, sem login). Criar, atualizar e apagar precisam d
 
 | Método | Rota | O que faz |
 |--------|------|-----------|
-| POST | `/products` | cria um produto; o dono vem do token (exige WhatsApp cadastrado) |
+| POST | `/products` | cria um produto; o dono vem do token (exige WhatsApp e chave Pix cadastrados) |
 | GET | `/products` | lista a vitrine, paginada e do mais novo pro mais antigo; `?q=termo` busca, `?owner={username}` filtra por vendedor |
 | GET | `/products/{productId}` | retorna um |
 | PUT | `/products/{productId}` | atualiza, só o dono |
@@ -30,8 +30,9 @@ Os GET são públicos (vitrine, sem login). Criar, atualizar e apagar precisam d
 
 O corpo de criar e atualizar é o `ProductRequestDTO`: `productName`, `productDescription`,
 `price` e `imageUrl`. A resposta inclui o `owner` (id, username, displayName e `hasWhatsapp`) e os
-timestamps. **Pra criar produto o vendedor precisa ter WhatsApp cadastrado** — sem ele, o `POST`
-responde **422** ("Cadastre seu WhatsApp para vender"). Ver a seção Users.
+timestamps. **Pra criar produto o vendedor precisa ter WhatsApp e chave Pix cadastrados** — sem
+WhatsApp ou sem Pix, o `POST` responde **422** ("Cadastre seu WhatsApp para vender" / "Cadastre sua
+chave Pix para vender"). Ver a seção Users.
 
 O `GET /products` é paginado (`?page`/`?size`, default 0/20) e devolve um `Page` (`content` +
 metadados), na ordem `createdAt` desc. Com `?q=termo` busca produtos por nome ou descrição (parcial,
@@ -91,8 +92,8 @@ produto/post). A `uploadUrl` expira em poucos minutos.
 | GET | `/users` | busca pública por username ou displayName, `?q=termo`, paginada |
 | GET | `/users/{username}` | perfil público de um usuário (não precisa de login) |
 | GET | `/users/{username}/whatsapp` | revela o WhatsApp do vendedor (precisa de login) |
-| GET | `/users/me` | perfil do usuário logado, com email e whatsapp (precisa de login) |
-| PUT | `/users/me` | edita o próprio perfil: whatsapp e/ou displayName (precisa de login) |
+| GET | `/users/me` | perfil do usuário logado, com email, whatsapp e chave Pix (precisa de login) |
+| PUT | `/users/me` | edita o próprio perfil: whatsapp, displayName e/ou chave Pix (precisa de login) |
 
 Modelo **guest browsing**: leitura de vitrine é pública, ação exige login. O `GET
 /users/{username}` é aberto e devolve o `UserPublicInfoDTO` (id, username, displayName e
@@ -103,16 +104,18 @@ vazio. O `GET /users/me` exige token e devolve o `UserResponseDTO` (com email e 
 do token. O `username` é validado no register por `^[a-z0-9._]{3,30}$`, é único (409 se repetir) e
 alguns nomes são reservados (ex.: `me`, `admin`).
 
-**WhatsApp / contato:** a compra acontece no WhatsApp do vendedor — o app **não tem checkout**. O
-número fica no campo `whatsapp` do user (opcional no cadastro; só dígitos com DDI, ex.
-`5584999998888`). Regras:
+**WhatsApp / contato e Pix:** a venda acontece **no site** (ver a seção Pedidos) — o WhatsApp do
+vendedor agora é só pra **tirar dúvidas**, mas **segue obrigatório pra vender**. O número fica no
+campo `whatsapp` do user (opcional no cadastro; só dígitos com DDI, ex. `5584999998888`); a chave Pix
+fica no campo `pixKey`. Regras:
 
-- **Não é público.** O `UserPublicInfoDTO` expõe só o boolean `hasWhatsapp` (true/false), nunca o
-  número — pro front decidir se mostra o botão "Chamar no WhatsApp".
-- **Obrigatório pra vender.** `POST /products` sem `whatsapp` cadastrado → **422**.
-- **Cadastrar/trocar:** `PUT /users/me` com o `UpdateMeRequestDTO` (`whatsapp` e/ou `displayName`,
-  ambos opcionais — manda só o que quer mudar; `whatsapp` fora do padrão de dígitos → 400). Devolve
-  o `UserResponseDTO` atualizado.
+- **Não são públicos.** O `UserPublicInfoDTO` expõe só o boolean `hasWhatsapp` (true/false), nunca o
+  número nem o Pix — pro front decidir se mostra o botão "Chamar no WhatsApp". O Pix do vendedor só é
+  revelado ao comprador dentro do pedido (`sellerPixKey`, ver Pedidos).
+- **Obrigatórios pra vender.** `POST /products` sem `whatsapp` **ou** sem `pixKey` cadastrado → **422**.
+- **Cadastrar/trocar:** `PUT /users/me` com o `UpdateMeRequestDTO` (`whatsapp`, `displayName` e/ou
+  `pixKey`, todos opcionais — manda só o que quer mudar; `whatsapp` fora do padrão de dígitos → 400).
+  Devolve o `UserResponseDTO` atualizado (que pro dono inclui `whatsapp` e `pixKey`).
 - **Revelar o número:** `GET /users/{username}/whatsapp` (autenticado — guest leva 401) devolve
   `{ username, whatsapp }`; responde 404 se o usuário não existe ou não tem número cadastrado.
 
@@ -147,3 +150,35 @@ worker usa na API do Melhor Envio.
 > **Stateless por enquanto:** o endpoint não lê as dimensões do produto nem o CEP do vendedor do
 > banco — quem chama passa tudo no corpo. Guardar dimensões no `Product` e o CEP no `User` é um
 > passo seguinte (precisa de decisão de modelagem).
+
+### Pedidos (Orders)
+
+A venda acontece no site: o comprador escolhe um produto, cota o frete (ver Frete), monta o pedido e
+paga via **Pix manual** — o app mostra a chave Pix do vendedor, o pagamento é feito fora do app e o
+vendedor confirma o recebimento na mão. Compra **unitária** (um produto por pedido, com quantidade),
+sem carrinho. Todas as rotas precisam do header `Authorization: Bearer <jwt>`.
+
+| Método | Rota | O que faz |
+|--------|------|-----------|
+| POST | `/orders` | comprador cria um pedido (produto, quantidade, frete escolhido e endereço) |
+| GET | `/orders` | meus pedidos como comprador, paginado |
+| GET | `/orders/received` | pedidos recebidos como vendedor, paginado |
+| GET | `/orders/{orderId}` | um pedido (só o comprador ou o vendedor dele) |
+| POST | `/orders/{orderId}/confirm-payment` | o vendedor confirma o Pix recebido |
+
+O corpo de criar é o `OrderRequestDTO`: `productId`, `quantity` (≥ 1), `freightService` (nome da
+opção de frete escolhida no `/freight/quote`), `freightPrice` (preço dela) e `address`
+(`recipientName`, `postalCode` 8 dígitos, `street`, `number`, `complement` opcional, `district`,
+`city`, `state` com 2 letras). O servidor **confia** na opção de frete enviada (não recalcula).
+
+Na criação o pedido congela **snapshots** do momento: `unitPrice` (preço do produto), `freightPrice`,
+`total` (`unitPrice × quantity + freightPrice`) e `sellerPixKey` (a chave Pix do vendedor) — mudar o
+produto ou o Pix depois não altera pedidos já feitos. O pedido nasce `AGUARDANDO_PAGAMENTO`; o
+comprador paga no Pix mostrado e o vendedor chama o `confirm-payment` pra marcar `PAGO`. Status:
+`AGUARDANDO_PAGAMENTO → PAGO → ENVIADO`, mais `CANCELADO`.
+
+A resposta (`OrderResponseDTO`) traz o `buyer` (público), o `product` aninhado (com o vendedor), os
+snapshots, o `sellerPixKey`, o `address`, o `status` e os timestamps. Erros (ProblemDetail): **404**
+produto ou pedido inexistente, **403** se você não é participante do pedido (no GET) ou não é o
+vendedor (no confirm), **409** ao confirmar um pedido que não está `AGUARDANDO_PAGAMENTO`, **422** se
+o vendedor não tem Pix cadastrado, **400** na validação do corpo.
