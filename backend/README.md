@@ -29,7 +29,7 @@ Os GET são públicos (vitrine, sem login). Criar, atualizar e apagar precisam d
 | DELETE | `/products/{productId}` | remove, só o dono |
 
 O corpo de criar e atualizar é o `ProductRequestDTO`: `productName`, `productDescription`,
-`price` e `imageUrl`. A resposta inclui o `owner` (id, username, displayName e `hasWhatsapp`) e os
+`price`, `imageUrl` e as dimensões pro frete (`weight` em kg, `width`/`height`/`length` em cm — todas opcionais). A resposta inclui o `owner` (id, username, displayName e `hasWhatsapp`) e os
 timestamps. **Pra criar produto o vendedor precisa ter WhatsApp e chave Pix cadastrados** — sem
 WhatsApp ou sem Pix, o `POST` responde **422** ("Cadastre seu WhatsApp para vender" / "Cadastre sua
 chave Pix para vender"). Ver a seção Users.
@@ -92,8 +92,8 @@ produto/post). A `uploadUrl` expira em poucos minutos.
 | GET | `/users` | busca pública por username ou displayName, `?q=termo`, paginada |
 | GET | `/users/{username}` | perfil público de um usuário (não precisa de login) |
 | GET | `/users/{username}/whatsapp` | revela o WhatsApp do vendedor (precisa de login) |
-| GET | `/users/me` | perfil do usuário logado, com email, whatsapp e chave Pix (precisa de login) |
-| PUT | `/users/me` | edita o próprio perfil: whatsapp, displayName e/ou chave Pix (precisa de login) |
+| GET | `/users/me` | perfil do usuário logado, com email, whatsapp, chave Pix e CEP (precisa de login) |
+| PUT | `/users/me` | edita o próprio perfil: whatsapp, displayName, chave Pix e/ou CEP de origem (precisa de login) |
 
 Modelo **guest browsing**: leitura de vitrine é pública, ação exige login. O `GET
 /users/{username}` é aberto e devolve o `UserPublicInfoDTO` (id, username, displayName e

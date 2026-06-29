@@ -8,5 +8,6 @@ public record UserResponseDTO(
         String username,
         String displayName,
         String whatsapp,
-        String pixKey) {
+        String pixKey,
+        String postalCode) {
 }

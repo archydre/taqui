@@ -11,6 +11,10 @@ public record ProductResponseDTO(
         String productDescription,
         BigDecimal price,
         String imageUrl,
+        BigDecimal weight,
+        BigDecimal width,
+        BigDecimal height,
+        BigDecimal length,
         UserPublicInfoDTO owner,
         Instant createdAt,
         Instant updatedAt

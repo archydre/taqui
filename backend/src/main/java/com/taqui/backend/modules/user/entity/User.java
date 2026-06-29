@@ -50,4 +50,7 @@ public class User {
 
     @Column(name = "pix_key")
     private String pixKey;
+
+    @Column(name = "postal_code")
+    private String postalCode;
 }
