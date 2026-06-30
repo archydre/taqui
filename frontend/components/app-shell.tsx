@@ -17,11 +17,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <TopBar />
       </div>
 
-      <aside className="fixed top-0 left-0 z-20 hidden h-screen w-[64px] border-r border-line bg-canvas lg:block">
+      <aside className="fixed top-0 left-0 z-20 hidden h-screen w-[72px] border-r border-line bg-canvas lg:block">
         <SideRail />
       </aside>
 
-      <div className="lg:pl-[64px]">
+      <div className="lg:pl-[72px]">
         <div className="mx-auto flex w-full max-w-[1000px] gap-6 px-4">
           <main className="min-w-0 flex-1 py-6">{children}</main>
 
