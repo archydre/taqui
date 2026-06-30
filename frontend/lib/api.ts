@@ -338,6 +338,51 @@ export function deletePost(token: string, postId: string): Promise<void> {
   return request(`/posts/${postId}`, { method: "DELETE", token });
 }
 
+// ---- Comentários (post e produto) ----
+
+export type Comment = {
+  commentId: string;
+  author: Owner;
+  content: string;
+  createdAt: string;
+};
+
+export function getPostComments(postId: string, page = 0, size = 50): Promise<Page<Comment>> {
+  return request(`/posts/${postId}/comments${buildQuery({ page, size })}`);
+}
+
+export function createPostComment(
+  token: string,
+  postId: string,
+  content: string,
+): Promise<Comment> {
+  return request(`/posts/${postId}/comments`, { method: "POST", token, body: { content } });
+}
+
+export function getProductComments(
+  productId: string,
+  page = 0,
+  size = 50,
+): Promise<Page<Comment>> {
+  return request(`/products/${productId}/comments${buildQuery({ page, size })}`);
+}
+
+export function createProductComment(
+  token: string,
+  productId: string,
+  content: string,
+): Promise<Comment> {
+  return request(`/products/${productId}/comments`, {
+    method: "POST",
+    token,
+    body: { content },
+  });
+}
+
+export function deleteComment(token: string, commentId: string): Promise<void> {
+  return request(`/comments/${commentId}`, { method: "DELETE", token });
+}
+
 export function updateProduct(
   token: string,
   productId: string,

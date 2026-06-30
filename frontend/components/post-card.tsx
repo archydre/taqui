@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { formatRelativeTime } from "@/lib/format";
 import { Avatar } from "./avatar";
 import { ProductAttachment } from "./product-attachment";
+import { CommentsSection } from "./comments-section";
 
 export function PostCard({ post }: { post: Post }) {
   const { user, token } = useAuth();
@@ -181,6 +182,13 @@ export function PostCard({ post }: { post: Post }) {
       {isAnuncio && post.product ? (
         <ProductAttachment product={post.product} />
       ) : null}
+
+      <CommentsSection
+        target="post"
+        targetId={post.postId}
+        ownerUsername={post.owner.username}
+        preview
+      />
     </article>
   );
 }

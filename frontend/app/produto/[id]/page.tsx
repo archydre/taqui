@@ -5,6 +5,7 @@ import { Avatar } from "@/components/avatar";
 import { RevealWhatsapp } from "@/components/reveal-whatsapp";
 import { ProductOwnerActions } from "@/components/product-owner-actions";
 import { BuyButton } from "@/components/buy-button";
+import { CommentsSection } from "@/components/comments-section";
 
 export default async function ProdutoPage({
   params,
@@ -33,7 +34,8 @@ export default async function ProdutoPage({
   }
 
   return (
-    <div className="mx-auto grid w-full max-w-4xl gap-8 py-4 md:grid-cols-2">
+    <div className="mx-auto w-full max-w-4xl py-4">
+      <div className="grid gap-8 md:grid-cols-2">
       <div className="overflow-hidden rounded-2xl border border-line bg-surface">
         <div className="aspect-square bg-line">
           {product.imageUrl ? (
@@ -94,6 +96,16 @@ export default async function ProdutoPage({
           />
         </div>
       </div>
+      </div>
+
+      <section className="mt-8">
+        <h2 className="font-display text-lg font-semibold text-ink">Comentários</h2>
+        <CommentsSection
+          target="product"
+          targetId={product.productId}
+          ownerUsername={product.owner.username}
+        />
+      </section>
     </div>
   );
 }
