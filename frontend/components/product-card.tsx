@@ -1,8 +1,15 @@
 import Link from "next/link";
 import { type Product, productImage } from "@/lib/api";
 import { PriceTag } from "./price-tag";
+import { IconComment } from "./icons";
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({
+  product,
+  commentCount,
+}: {
+  product: Product;
+  commentCount?: number;
+}) {
   const image = productImage(product);
 
   return (
@@ -24,6 +31,12 @@ export function ProductCard({ product }: { product: Product }) {
             sem foto
           </div>
         )}
+        {commentCount !== undefined ? (
+          <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-ink/55 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
+            <IconComment className="h-3.5 w-3.5" />
+            {commentCount}
+          </div>
+        ) : null}
         <div className="absolute bottom-2 left-0">
           <PriceTag price={product.price} />
         </div>

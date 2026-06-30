@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   ApiError,
   getPosts,
+  getProductComments,
   getProducts,
   getUserByUsername,
   type Owner,
@@ -41,6 +42,7 @@ export default async function PerfilPublico({
 
   let products: Product[] = [];
   let posts: Post[] = [];
+  const commentCounts: Record<string, number> = {};
   try {
     const [p, f] = await Promise.all([
       getProducts({ owner: username, size: 12 }),
@@ -48,6 +50,16 @@ export default async function PerfilPublico({
     ]);
     products = p.content;
     posts = f.content;
+    const counts = await Promise.all(
+      products.map((product) =>
+        getProductComments(product.productId, 0, 1)
+          .then((page) => page.totalElements)
+          .catch(() => 0),
+      ),
+    );
+    products.forEach((product, i) => {
+      commentCounts[product.productId] = counts[i];
+    });
   } catch {
     // mantém listas vazias se algo falhar
   }
@@ -74,7 +86,11 @@ export default async function PerfilPublico({
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             {products.map((product) => (
-              <ProductCard key={product.productId} product={product} />
+              <ProductCard
+                key={product.productId}
+                product={product}
+                commentCount={commentCounts[product.productId]}
+              />
             ))}
           </div>
         )}
