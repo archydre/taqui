@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { TopBar } from "./top-bar";
 import { SideRail } from "./side-rail";
 import { ProfileSidebar } from "./profile-sidebar";
+import { WelcomeModal } from "./welcome-modal";
 
 const authRoutes = ["/entrar", "/cadastrar"];
 
@@ -32,6 +33,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ) : null}
         </div>
       </div>
+
+      <WelcomeModal />
     </div>
   );
 }
