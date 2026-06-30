@@ -1,24 +1,32 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ApiError, createProduct } from "@/lib/api";
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import {
+  ApiError,
+  getProductById,
+  updateProduct,
+  type Product,
+} from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { RequireAuth } from "@/components/require-auth";
 import { ImagePicker } from "@/components/image-picker";
 
-export default function VenderPage() {
+export default function EditarProdutoPage() {
   return (
     <RequireAuth>
-      <VenderForm />
+      <EditarForm />
     </RequireAuth>
   );
 }
 
-function VenderForm() {
+function EditarForm() {
+  const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { token } = useAuth();
+  const { user, token } = useAuth();
+
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [form, setForm] = useState({
     productName: "",
     productDescription: "",
@@ -32,7 +40,36 @@ function VenderForm() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [missingProfile, setMissingProfile] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+    getProductById(id)
+      .then((p) => {
+        if (user && user.username !== p.owner.username) {
+          router.replace(`/produto/${id}`);
+          return;
+        }
+        setProduct(p);
+        setForm({
+          productName: p.productName,
+          productDescription: p.productDescription ?? "",
+          price: String(p.price),
+          imageUrl: p.imageUrl ?? "",
+          thumbnailUrl: p.thumbnailUrl ?? "",
+          weight: p.weight != null ? String(p.weight) : "",
+          width: p.width != null ? String(p.width) : "",
+          height: p.height != null ? String(p.height) : "",
+          length: p.length != null ? String(p.length) : "",
+        });
+      })
+      .catch((err) => {
+        setLoadError(
+          err instanceof ApiError && err.status === 404
+            ? "Produto não encontrado."
+            : "Não foi possível carregar o produto.",
+        );
+      });
+  }, [id, user, router]);
 
   function update(field: keyof typeof form) {
     return (
@@ -47,7 +84,7 @@ function VenderForm() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!token) return;
+    if (!token || !product) return;
     const price = Number(form.price.replace(",", "."));
     if (!Number.isFinite(price) || price <= 0) {
       setError("Informe um preço válido.");
@@ -55,9 +92,8 @@ function VenderForm() {
     }
     setSubmitting(true);
     setError(null);
-    setMissingProfile(false);
     try {
-      const product = await createProduct(token, {
+      await updateProduct(token, product.productId, {
         productName: form.productName,
         productDescription: form.productDescription || undefined,
         price,
@@ -70,20 +106,29 @@ function VenderForm() {
       });
       router.push(`/produto/${product.productId}`);
     } catch (err) {
-      if (err instanceof ApiError && err.status === 422) {
-        setMissingProfile(true);
-        setError(err.message);
-      } else {
-        setError(err instanceof ApiError ? err.message : "Não foi possível anunciar devido a um erro.");
-      }
+      setError(
+        err instanceof ApiError ? err.message : "Não foi possível salvar as alterações.",
+      );
       setSubmitting(false);
     }
   }
 
+  if (loadError) {
+    return (
+      <div className="mx-auto w-full max-w-md py-10 text-center">
+        <p className="text-ink-soft">{loadError}</p>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return <div className="mx-auto w-full max-w-md py-10" />;
+  }
+
   return (
     <div className="mx-auto w-full max-w-md py-8">
-      <h1 className="font-display text-2xl font-semibold text-ink">Anunciar produto</h1>
-      <p className="mt-1 text-ink-soft">Coloque algo à venda na vitrine.</p>
+      <h1 className="font-display text-2xl font-semibold text-ink">Editar produto</h1>
+      <p className="mt-1 text-ink-soft">Atualize as informações do anúncio.</p>
 
       <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-4">
         <label className="flex flex-col gap-1">
@@ -151,24 +196,24 @@ function VenderForm() {
           </div>
         </fieldset>
 
-        {error ? <p className="text-sm font-medium text-slate-700">{error}</p> : null}
-        {missingProfile ? (
-          <p className="text-sm text-ink-soft">
-            Complete seu{" "}
-            <Link href="/perfil" className="font-medium text-action hover:underline">
-              perfil
-            </Link>{" "}
-            (WhatsApp e chave Pix) para poder vender.
-          </p>
-        ) : null}
+        {error ? <p className="text-sm font-medium text-red-600">{error}</p> : null}
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-full bg-action px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-action-strong disabled:opacity-50"
-        >
-          {submitting ? "Publicando…" : "Publicar anúncio"}
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="flex-1 rounded-full bg-action px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-action-strong disabled:opacity-50"
+          >
+            {submitting ? "Salvando…" : "Salvar alterações"}
+          </button>
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="rounded-full border border-line px-5 py-2.5 text-sm font-medium text-ink hover:bg-ink/5"
+          >
+            Cancelar
+          </button>
+        </div>
       </form>
     </div>
   );

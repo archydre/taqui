@@ -285,6 +285,26 @@ export function createPost(token: string, input: CreatePostInput): Promise<Post>
   return request("/posts", { method: "POST", token, body: input });
 }
 
+export function updatePost(token: string, postId: string, input: CreatePostInput): Promise<Post> {
+  return request(`/posts/${postId}`, { method: "PUT", token, body: input });
+}
+
+export function deletePost(token: string, postId: string): Promise<void> {
+  return request(`/posts/${postId}`, { method: "DELETE", token });
+}
+
+export function updateProduct(
+  token: string,
+  productId: string,
+  input: CreateProductInput,
+): Promise<Product> {
+  return request(`/products/${productId}`, { method: "PUT", token, body: input });
+}
+
+export function deleteProduct(token: string, productId: string): Promise<void> {
+  return request(`/products/${productId}`, { method: "DELETE", token });
+}
+
 // ---- Frete ----
 
 export function quoteFreightForProduct(

@@ -21,8 +21,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <SideRail />
       </aside>
 
-      <div className="lg:pl-[72px]">
-        <div className="mx-auto flex w-full max-w-[1000px] gap-6 px-4">
+      <div className="lg:pl-[72px] lg:pr-20">
+        <div className="mx-auto flex w-full max-w-[1000px] gap-8 px-4 pt-4">
           <main className="min-w-0 flex-1 py-6">{children}</main>
 
           {!isAuth ? (

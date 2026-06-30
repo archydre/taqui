@@ -3,6 +3,7 @@ import { ApiError, getProductById, type Product } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
 import { Avatar } from "@/components/avatar";
 import { RevealWhatsapp } from "@/components/reveal-whatsapp";
+import { ProductOwnerActions } from "@/components/product-owner-actions";
 
 export default async function ProdutoPage({
   params,
@@ -88,6 +89,10 @@ export default async function ProdutoPage({
           {product.owner.hasWhatsapp ? (
             <RevealWhatsapp username={product.owner.username} />
           ) : null}
+          <ProductOwnerActions
+            productId={product.productId}
+            ownerUsername={product.owner.username}
+          />
         </div>
       </div>
     </div>
