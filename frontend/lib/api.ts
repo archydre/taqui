@@ -1,5 +1,10 @@
+// No navegador usamos a URL pública (localhost:8080). No servidor (SSR dentro do
+// container) localhost é o próprio front, então preferimos API_INTERNAL_URL
+// (ex.: http://backend:8080, o nome do serviço no compose).
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+  (typeof window === "undefined" ? process.env.API_INTERNAL_URL : undefined) ??
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  "http://localhost:8080";
 
 export class ApiError extends Error {
   status: number;
@@ -224,6 +229,33 @@ export function revealWhatsapp(
   return request(`/users/${username}/whatsapp`, { token });
 }
 
+// ---- Upload de imagem (multipart -> back -> R2) ----
+
+export type UploadResult = { imageUrl: string; thumbnailUrl: string };
+
+export async function uploadImage(token: string, file: File): Promise<UploadResult> {
+  const form = new FormData();
+  form.append("file", file);
+  // Sem Content-Type manual: o browser define o boundary do multipart.
+  const res = await fetch(new URL("/uploads", API_BASE_URL), {
+    method: "POST",
+    cache: "no-store",
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    body: form,
+  });
+  if (!res.ok) {
+    let detail = `POST /uploads respondeu ${res.status}`;
+    try {
+      const problem = await res.json();
+      detail = problem?.detail ?? problem?.message ?? detail;
+    } catch {
+      // resposta sem corpo JSON
+    }
+    throw new ApiError(detail, res.status);
+  }
+  return res.json() as Promise<UploadResult>;
+}
+
 // ---- Criar produto / post ----
 
 export type CreateProductInput = {
@@ -231,6 +263,7 @@ export type CreateProductInput = {
   productDescription?: string;
   price: number;
   imageUrl?: string;
+  thumbnailUrl?: string;
   weight?: number;
   width?: number;
   height?: number;
@@ -244,6 +277,7 @@ export function createProduct(token: string, input: CreateProductInput): Promise
 export type CreatePostInput = {
   content?: string;
   imageUrl?: string;
+  thumbnailUrl?: string;
   productId?: string;
 };
 

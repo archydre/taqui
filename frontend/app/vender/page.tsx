@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ApiError, createProduct } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { RequireAuth } from "@/components/require-auth";
+import { ImagePicker } from "@/components/image-picker";
 
 export default function VenderPage() {
   return (
@@ -23,6 +24,7 @@ function VenderForm() {
     productDescription: "",
     price: "",
     imageUrl: "",
+    thumbnailUrl: "",
     weight: "",
     width: "",
     height: "",
@@ -60,6 +62,7 @@ function VenderForm() {
         productDescription: form.productDescription || undefined,
         price,
         imageUrl: form.imageUrl || undefined,
+        thumbnailUrl: form.thumbnailUrl || undefined,
         weight: optionalNumber(form.weight),
         width: optionalNumber(form.width),
         height: optionalNumber(form.height),
@@ -114,16 +117,23 @@ function VenderForm() {
             className="rounded-lg border border-line bg-surface px-3 py-2.5 text-sm text-ink focus-visible:border-action focus-visible:outline-none"
           />
         </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-ink">URL da imagem</span>
-          <input
-            type="url"
-            value={form.imageUrl}
-            onChange={update("imageUrl")}
-            placeholder="https://…"
-            className="rounded-lg border border-line bg-surface px-3 py-2.5 text-sm text-ink placeholder:text-ink-soft focus-visible:border-action focus-visible:outline-none"
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-medium text-ink">Imagem</span>
+          <ImagePicker
+            token={token}
+            imageUrl={form.imageUrl || null}
+            onUploaded={(urls) =>
+              setForm((f) => ({
+                ...f,
+                imageUrl: urls.imageUrl,
+                thumbnailUrl: urls.thumbnailUrl,
+              }))
+            }
+            onClear={() =>
+              setForm((f) => ({ ...f, imageUrl: "", thumbnailUrl: "" }))
+            }
           />
-        </label>
+        </div>
 
         <fieldset className="rounded-lg border border-line p-3">
           <legend className="px-1 text-sm font-medium text-ink">
@@ -141,7 +151,7 @@ function VenderForm() {
           </div>
         </fieldset>
 
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        {error ? <p className="text-sm font-medium text-slate-700">{error}</p> : null}
         {missingProfile ? (
           <p className="text-sm text-ink-soft">
             Complete seu{" "}

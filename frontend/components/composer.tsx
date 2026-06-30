@@ -6,12 +6,14 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { ApiError, createPost } from "@/lib/api";
 import { Avatar } from "./avatar";
+import { ImagePicker } from "./image-picker";
 
 export function Composer() {
   const { user, token, loading } = useAuth();
   const router = useRouter();
   const [content, setContent] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [showImage, setShowImage] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,8 +51,7 @@ export function Composer() {
   async function publish() {
     if (!token) return;
     const trimmed = content.trim();
-    const image = imageUrl.trim();
-    if (!trimmed && !image) {
+    if (!trimmed && !imageUrl) {
       setError("Escreva algo ou adicione uma imagem.");
       return;
     }
@@ -59,10 +60,12 @@ export function Composer() {
     try {
       await createPost(token, {
         content: trimmed || undefined,
-        imageUrl: image || undefined,
+        imageUrl: imageUrl || undefined,
+        thumbnailUrl: thumbnailUrl || undefined,
       });
       setContent("");
-      setImageUrl("");
+      setImageUrl(null);
+      setThumbnailUrl(null);
       setShowImage(false);
       router.refresh();
     } catch (e) {
@@ -87,21 +90,34 @@ export function Composer() {
           />
 
           {showImage ? (
-            <input
-              type="url"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="Cole a URL de uma imagem…"
-              className="mt-2 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm text-ink placeholder:text-ink-soft focus-visible:border-action focus-visible:outline-none"
-            />
+            <div className="mt-2">
+              <ImagePicker
+                token={token}
+                imageUrl={imageUrl}
+                onUploaded={(urls) => {
+                  setImageUrl(urls.imageUrl);
+                  setThumbnailUrl(urls.thumbnailUrl);
+                }}
+                onClear={() => {
+                  setImageUrl(null);
+                  setThumbnailUrl(null);
+                }}
+              />
+            </div>
           ) : null}
 
-          {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
+          {error ? <p className="mt-2 text-sm font-medium text-slate-700">{error}</p> : null}
 
           <div className="mt-3 flex items-center justify-between">
             <button
               type="button"
-              onClick={() => setShowImage((v) => !v)}
+              onClick={() => {
+                if (showImage) {
+                  setImageUrl(null);
+                  setThumbnailUrl(null);
+                }
+                setShowImage((v) => !v);
+              }}
               className="rounded-full px-3 py-1.5 text-sm font-medium text-ink-soft hover:bg-ink/5 hover:text-ink"
             >
               {showImage ? "Remover imagem" : "Adicionar imagem"}
