@@ -26,6 +26,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    env_file: ./backend/.env
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/taqui
       SPRING_DATASOURCE_USERNAME: taqui
@@ -48,6 +49,11 @@ services:
       API_INTERNAL_URL: http://backend:8080
     ports:
       - "3000:3000"
+
+  image-worker:
+    build: ./services
+    restart: unless-stopped
+    env_file: ./services/.env
 
 volumes:
   taqui-pgdata:
