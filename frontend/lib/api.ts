@@ -21,6 +21,33 @@ type RequestOptions = {
   body?: unknown;
 };
 
+// Mensagem amigável por status, sem expor caminho nem ID interno.
+function statusMessage(status: number): string {
+  if (status === 400) return "Requisição inválida.";
+  if (status === 401) return "Sua sessão expirou. Entre novamente.";
+  if (status === 403) return "Você não tem permissão para isso.";
+  if (status === 404) return "Não encontramos o que você procura.";
+  if (status === 409) return "Isso conflita com o estado atual.";
+  if (status === 422) return "Não foi possível processar os dados enviados.";
+  if (status >= 500) return "Erro no servidor. Tente novamente em instantes.";
+  return "Algo deu errado. Tente novamente.";
+}
+
+const UUID_PATTERN =
+  /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi;
+
+// Remove UUIDs de qualquer texto que vá para a tela.
+function stripIds(message: string): string {
+  return message.replace(UUID_PATTERN, "").replace(/\s{2,}/g, " ").trim();
+}
+
+// Callback disparado quando uma chamada autenticada recebe 401 (token inválido/expirado).
+let onUnauthorized: (() => void) | null = null;
+
+export function setUnauthorizedHandler(handler: (() => void) | null): void {
+  onUnauthorized = handler;
+}
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", token, body } = options;
   const res = await fetch(new URL(path, API_BASE_URL), {
@@ -34,12 +61,16 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   });
 
   if (!res.ok) {
-    let detail = `${method} ${path} respondeu ${res.status}`;
+    if (res.status === 401 && token) onUnauthorized?.();
+    let detail = statusMessage(res.status);
     try {
       const problem = await res.json();
-      detail = problem?.detail ?? problem?.message ?? detail;
+      const fromBody = problem?.detail ?? problem?.message;
+      if (typeof fromBody === "string" && fromBody.trim()) {
+        detail = stripIds(fromBody) || detail;
+      }
     } catch {
-      // resposta sem corpo JSON
+      // resposta sem corpo JSON: mantém a mensagem amigável
     }
     throw new ApiError(detail, res.status);
   }
@@ -244,12 +275,16 @@ export async function uploadImage(token: string, file: File): Promise<UploadResu
     body: form,
   });
   if (!res.ok) {
-    let detail = `POST /uploads respondeu ${res.status}`;
+    if (res.status === 401 && token) onUnauthorized?.();
+    let detail = statusMessage(res.status);
     try {
       const problem = await res.json();
-      detail = problem?.detail ?? problem?.message ?? detail;
+      const fromBody = problem?.detail ?? problem?.message;
+      if (typeof fromBody === "string" && fromBody.trim()) {
+        detail = stripIds(fromBody) || detail;
+      }
     } catch {
-      // resposta sem corpo JSON
+      // resposta sem corpo JSON: mantém a mensagem amigável
     }
     throw new ApiError(detail, res.status);
   }

@@ -7,7 +7,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { getMe, type Me } from "@/lib/api";
+import { getMe, setUnauthorizedHandler, type Me } from "@/lib/api";
 
 const TOKEN_KEY = "taqui_token";
 
@@ -64,6 +64,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
     setUser(null);
   }, []);
+
+  useEffect(() => {
+    setUnauthorizedHandler(logout);
+    return () => setUnauthorizedHandler(null);
+  }, [logout]);
 
   const refresh = useCallback(async () => {
     if (token) await loadUser(token);

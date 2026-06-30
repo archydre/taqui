@@ -17,7 +17,13 @@ export function ProfileSidebar() {
       <div className="flex flex-1 items-center">
         <div className="w-full">
           {loading ? (
-            <div className="h-12 animate-pulse rounded-xl bg-line" />
+            <div className="animate-pulse rounded-2xl border border-line bg-surface p-4">
+              <div className="mx-auto h-4 w-3/4 rounded bg-line" />
+              <div className="mt-4 flex flex-col gap-2">
+                <div className="h-9 rounded-full bg-line" />
+                <div className="h-9 rounded-full bg-line" />
+              </div>
+            </div>
           ) : user ? (
             <div className="flex items-center gap-3">
               <Link href={`/u/${user.username}`} className="shrink-0">

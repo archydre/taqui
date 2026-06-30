@@ -11,7 +11,14 @@ export function RevealWhatsapp({ username }: { username: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div
+        className="h-9 w-44 animate-pulse rounded-full bg-line"
+        aria-hidden="true"
+      />
+    );
+  }
 
   if (!token) {
     return (
