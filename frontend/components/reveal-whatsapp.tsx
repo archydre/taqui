@@ -64,7 +64,7 @@ export function RevealWhatsapp({ username }: { username: string }) {
       >
         {busy ? "Mostrando…" : "Mostrar WhatsApp"}
       </button>
-      {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="mt-2 text-sm font-medium text-slate-700">{error}</p> : null}
     </div>
   );
 }

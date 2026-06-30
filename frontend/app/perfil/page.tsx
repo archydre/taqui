@@ -84,7 +84,7 @@ function PerfilForm() {
           hint="8 dígitos. Usado para calcular o frete dos seus produtos."
         />
 
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        {error ? <p className="text-sm font-medium text-slate-700">{error}</p> : null}
         {saved ? <p className="text-sm text-price">Perfil salvo.</p> : null}
 
         <button

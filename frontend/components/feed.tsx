@@ -14,7 +14,7 @@ export async function Feed() {
 
   if (error) {
     return (
-      <p className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+      <p className="rounded-xl border border-slate-300 bg-slate-100 px-4 py-3 text-sm text-slate-700">
         Não foi possível carregar o feed. A API está no ar?
       </p>
     );

@@ -96,7 +96,7 @@ export default function CadastrarPage() {
           <span className="text-xs text-ink-soft">No mínimo 8 caracteres.</span>
         </label>
 
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        {error ? <p className="text-sm font-medium text-slate-700">{error}</p> : null}
 
         <button
           type="submit"

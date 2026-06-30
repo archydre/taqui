@@ -3,7 +3,7 @@ import { type OrderStatus } from "@/lib/api";
 const labels: Record<OrderStatus, { text: string; className: string }> = {
   AGUARDANDO_PAGAMENTO: {
     text: "Aguardando pagamento",
-    className: "bg-amber-100 text-amber-800",
+    className: "bg-indigo-100 text-indigo-800",
   },
   PAGO: { text: "Pago", className: "bg-price/10 text-price" },
   ENVIADO: { text: "Enviado", className: "bg-blue-100 text-blue-800" },

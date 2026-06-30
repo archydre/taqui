@@ -59,7 +59,7 @@ export default function EntrarPage() {
           />
         </label>
 
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        {error ? <p className="text-sm font-medium text-slate-700">{error}</p> : null}
 
         <button
           type="submit"
