@@ -12,9 +12,11 @@ import com.taqui.backend.modules.post.exception.PostNotFoundException;
 import com.taqui.backend.modules.storage.exception.InvalidUploadException;
 import com.taqui.backend.modules.user.exception.ContactUnavailableException;
 import com.taqui.backend.modules.user.exception.EmailAlreadyExistsException;
+import com.taqui.backend.modules.user.exception.PixKeyAlreadyExistsException;
 import com.taqui.backend.modules.user.exception.PixKeyRequiredException;
 import com.taqui.backend.modules.user.exception.UsernameAlreadyExistsException;
 import com.taqui.backend.modules.user.exception.UserNotFoundException;
+import com.taqui.backend.modules.user.exception.WhatsappAlreadyExistsException;
 import com.taqui.backend.modules.user.exception.WhatsappRequiredException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -37,6 +39,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UsernameAlreadyExistsException.class)
     public ProblemDetail handleUsernameAlreadyExists(UsernameAlreadyExistsException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(WhatsappAlreadyExistsException.class)
+    public ProblemDetail handleWhatsappAlreadyExists(WhatsappAlreadyExistsException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(PixKeyAlreadyExistsException.class)
+    public ProblemDetail handlePixKeyAlreadyExists(PixKeyAlreadyExistsException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     }
 
