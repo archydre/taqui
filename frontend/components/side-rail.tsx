@@ -43,7 +43,7 @@ export function SideRail() {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/taqui_logo.jpg"
+          src="/taqui_logo.png"
           alt="taqui"
           width={40}
           height={40}

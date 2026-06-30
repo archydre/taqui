@@ -5,7 +5,7 @@ export function Brand() {
     <Link href="/" className="flex shrink-0 items-center gap-2">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/taqui_logo.jpg"
+        src="/taqui_logo.png"
         alt="taqui"
         width={36}
         height={36}
