@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ApiError,
   type Comment,
@@ -28,6 +29,7 @@ export function CommentsSection({
   preview?: boolean;
 }) {
   const { user, token } = useAuth();
+  const router = useRouter();
   const [comments, setComments] = useState<Comment[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -178,12 +180,23 @@ export function CommentsSection({
               </button>
             </form>
           ) : (
-            <p className="mt-3 text-sm text-ink-soft">
-              <Link href="/entrar" className="font-medium text-action hover:underline">
-                Entre
-              </Link>{" "}
-              para comentar.
-            </p>
+            <div className="mt-3 flex items-center gap-2">
+              <input
+                readOnly
+                placeholder="Escreva um comentário…"
+                onClick={() => router.push("/entrar")}
+                className="min-w-0 flex-1 cursor-pointer rounded-full border border-line bg-surface px-4 py-2 text-sm text-ink placeholder:text-ink-soft focus-visible:border-action focus-visible:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => router.push("/entrar")}
+                aria-label="Comentar"
+                title="Comentar"
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-action text-white transition-colors hover:bg-action-strong"
+              >
+                <IconComment className="h-5 w-5" />
+              </button>
+            </div>
           )}
 
           {error ? (

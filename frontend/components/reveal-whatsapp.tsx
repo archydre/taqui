@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { ApiError, revealWhatsapp } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
@@ -22,16 +21,8 @@ export function RevealWhatsapp({ username }: { username: string }) {
 
   if (user && user.username === username) return null;
 
-  if (!token) {
-    return (
-      <Link
-        href="/entrar"
-        className="inline-flex rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-ink/5"
-      >
-        Entre para ver o WhatsApp
-      </Link>
-    );
-  }
+  // Guest não tem opção de contato.
+  if (!token) return null;
 
   if (number) {
     const digits = number.replace(/\D/g, "");
