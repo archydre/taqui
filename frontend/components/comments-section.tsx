@@ -14,6 +14,7 @@ import {
 import { useAuth } from "@/lib/auth";
 import { formatRelativeTime } from "@/lib/format";
 import { Avatar } from "./avatar";
+import { IconComment } from "./icons";
 
 export function CommentsSection({
   target,
@@ -95,14 +96,14 @@ export function CommentsSection({
   const visible = expanded ? comments : comments.slice(0, 1);
 
   return (
-    <section className="mt-3 border-t border-line pt-3">
+    <section
+      className={`mt-3 border-t border-line pt-3${preview ? " pl-6" : ""}`}
+    >
       {loading ? (
         <p className="text-sm text-ink-soft">Carregando comentários…</p>
       ) : (
         <>
-          {total === 0 ? (
-            <p className="text-sm text-ink-soft">Nenhum comentário ainda.</p>
-          ) : (
+          {visible.length > 0 ? (
             <ul className="flex flex-col gap-3">
               {visible.map((c) => {
                 const canDelete =
@@ -115,7 +116,7 @@ export function CommentsSection({
                       <Avatar
                         name={c.author.displayName}
                         seed={c.author.username}
-                        size={32}
+                        size={28}
                       />
                     </Link>
                     <div className="min-w-0 flex-1">
@@ -145,7 +146,7 @@ export function CommentsSection({
                 );
               })}
             </ul>
-          )}
+          ) : null}
 
           {preview && total > 1 ? (
             <button
@@ -169,9 +170,11 @@ export function CommentsSection({
               <button
                 type="submit"
                 disabled={posting || !content.trim()}
-                className="shrink-0 rounded-full bg-action px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-action-strong disabled:opacity-50"
+                aria-label="Comentar"
+                title="Comentar"
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-action text-white transition-colors hover:bg-action-strong disabled:opacity-50"
               >
-                {posting ? "…" : "Comentar"}
+                <IconComment className="h-5 w-5" />
               </button>
             </form>
           ) : (

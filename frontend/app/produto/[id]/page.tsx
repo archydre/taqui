@@ -61,12 +61,6 @@ export default async function ProdutoPage({
           {formatPrice(product.price)}
         </p>
 
-        {product.productDescription ? (
-          <p className="mt-4 whitespace-pre-wrap text-[15px] leading-relaxed text-ink">
-            {product.productDescription}
-          </p>
-        ) : null}
-
         <Link
           href={`/u/${product.owner.username}`}
           className="mt-6 flex items-center gap-3 rounded-xl border border-line bg-surface p-3 hover:bg-ink/5"
@@ -97,6 +91,19 @@ export default async function ProdutoPage({
         </div>
       </div>
       </div>
+
+      <section className="mt-8">
+        <h2 className="font-display text-lg font-semibold text-ink">
+          Descrição do produto
+        </h2>
+        {product.productDescription ? (
+          <p className="mt-2 whitespace-pre-wrap text-[15px] leading-relaxed text-ink">
+            {product.productDescription}
+          </p>
+        ) : (
+          <p className="mt-2 text-sm text-ink-soft">Sem descrição.</p>
+        )}
+      </section>
 
       <section className="mt-8">
         <h2 className="font-display text-lg font-semibold text-ink">Comentários</h2>

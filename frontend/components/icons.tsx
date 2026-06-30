@@ -66,3 +66,11 @@ export function IconImagePlus({ className }: IconProps) {
     </svg>
   );
 }
+
+export function IconComment({ className }: IconProps) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+    </svg>
+  );
+}
