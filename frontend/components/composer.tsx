@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
@@ -19,6 +19,15 @@ export function Composer() {
   const [submitting, setSubmitting] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Alterna a frase do CTA de guest a cada carregamento (lê o último mostrado e inverte).
+  const [feedCtaVariant] = useState(() => {
+    if (typeof window === "undefined") return 0;
+    return window.localStorage.getItem("taqui_feed_cta") === "0" ? 1 : 0;
+  });
+
+  useEffect(() => {
+    window.localStorage.setItem("taqui_feed_cta", String(feedCtaVariant));
+  }, [feedCtaVariant]);
 
   if (loading) {
     return (
@@ -41,10 +50,12 @@ export function Composer() {
     return (
       <div className="mb-4 rounded-2xl border border-line bg-surface p-5 text-center shadow-sm">
         <p className="text-ink-soft">
+          {feedCtaVariant === 0
+            ? "Quer anunciar um produto? Clique "
+            : "Quer fazer uma publicação? Clique "}
           <Link href="/entrar" className="font-medium text-action hover:underline">
-            Entre
-          </Link>{" "}
-          para publicar no feed e vender.
+            aqui
+          </Link>
         </p>
       </div>
     );
