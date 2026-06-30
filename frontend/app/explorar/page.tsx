@@ -1,5 +1,5 @@
 import { getProducts, type Product } from "@/lib/api";
-import { ProductCard } from "@/components/product-card";
+import { ProductCardExpanded } from "@/components/product-card-expanded";
 
 export default async function Explorar({
   searchParams,
@@ -42,9 +42,9 @@ export default async function Explorar({
             : "Nenhum produto na vitrine ainda."}
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-5 lg:grid-cols-3">
           {products.map((product) => (
-            <ProductCard key={product.productId} product={product} />
+            <ProductCardExpanded key={product.productId} product={product} />
           ))}
         </div>
       )}
