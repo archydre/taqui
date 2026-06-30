@@ -6,6 +6,7 @@ import { RevealWhatsapp } from "@/components/reveal-whatsapp";
 import { ProductOwnerActions } from "@/components/product-owner-actions";
 import { BuyButton } from "@/components/buy-button";
 import { CommentsSection } from "@/components/comments-section";
+import { ProductImageZoom } from "@/components/product-image-zoom";
 
 export default async function ProdutoPage({
   params,
@@ -39,12 +40,7 @@ export default async function ProdutoPage({
       <div className="overflow-hidden rounded-2xl border border-line bg-surface">
         <div className="aspect-square bg-line">
           {product.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={product.imageUrl}
-              alt={product.productName}
-              className="h-full w-full object-cover"
-            />
+            <ProductImageZoom src={product.imageUrl} alt={product.productName} />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-ink-soft">
               sem foto
@@ -93,7 +89,7 @@ export default async function ProdutoPage({
       </div>
 
       <section className="mt-8">
-        <h2 className="font-display text-lg font-semibold text-ink">
+        <h2 className="font-display text-xl font-semibold text-ink">
           Descrição do produto
         </h2>
         {product.productDescription ? (
@@ -105,8 +101,8 @@ export default async function ProdutoPage({
         )}
       </section>
 
-      <section className="mt-8">
-        <h2 className="font-display text-lg font-semibold text-ink">Comentários</h2>
+      <section className="mt-8 border-t border-line pt-8">
+        <h2 className="font-display text-xl font-semibold text-ink">Comentários</h2>
         <CommentsSection
           target="product"
           targetId={product.productId}

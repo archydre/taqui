@@ -97,7 +97,7 @@ export function CommentsSection({
 
   return (
     <section
-      className={`mt-3 border-t border-line pt-3${preview ? " pl-6" : ""}`}
+      className={preview ? "mt-3 border-t border-line pt-3 pl-6" : "mt-3"}
     >
       {loading ? (
         <p className="text-sm text-ink-soft">Carregando comentários…</p>
