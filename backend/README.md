@@ -29,7 +29,7 @@ Os GET são públicos (vitrine, sem login). Criar, atualizar e apagar precisam d
 | DELETE | `/products/{productId}` | remove, só o dono |
 
 O corpo de criar e atualizar é o `ProductRequestDTO`: `productName`, `productDescription`,
-`price`, `imageUrl` e as dimensões pro frete (`weight` em kg, `width`/`height`/`length` em cm — todas opcionais). A resposta inclui o `owner` (id, username, displayName e `hasWhatsapp`) e os
+`price`, `imageUrl`, `thumbnailUrl` e as dimensões pro frete (`weight` em kg, `width`/`height`/`length` em cm — todas opcionais). O `imageUrl` é a imagem original e o `thumbnailUrl` o thumb 400×400 — ambos vêm do `POST /uploads` (o front manda os dois; use o thumb na vitrine e o original no detalhe). A resposta inclui o `owner` (id, username, displayName e `hasWhatsapp`) e os
 timestamps. **Pra criar produto o vendedor precisa ter WhatsApp e chave Pix cadastrados** — sem
 WhatsApp ou sem Pix, o `POST` responde **422** ("Cadastre seu WhatsApp para vender" / "Cadastre sua
 chave Pix para vender"). Ver a seção Users.
@@ -54,14 +54,14 @@ Os GET são públicos (vitrine, sem login). Criar, atualizar e apagar precisam d
 | DELETE | `/posts/{postId}` | remove, só o dono |
 
 Há dois tipos, definidos por enviar ou não `productId` no corpo (`content`, `imageUrl`,
-`productId`):
+`thumbnailUrl`, `productId`):
 
 - **anúncio** — `productId` aponta pra um produto **seu** (senão 403); a resposta traz o
   produto aninhado e `type: "ANUNCIO"`.
 - **comum** — sem `productId`; precisa de `content` ou `imageUrl`, senão 400 (`type: "COMUM"`).
 
 A resposta (`PostResponseDTO`) inclui `owner` (id, username e displayName), o `product`
-(null no post comum) e os timestamps.
+(null no post comum), o `imageUrl`/`thumbnailUrl` (do post comum) e os timestamps.
 
 O `GET /posts` é paginado: aceita `?page` (default 0) e `?size` (default 20) e devolve um
 `Page` — os posts vêm em `content` e os metadados (`totalElements`, `totalPages`, `number`,
@@ -78,12 +78,21 @@ Precisa do header `Authorization: Bearer <jwt>`.
 
 | Método | Rota | O que faz |
 |--------|------|-----------|
-| POST | `/uploads` | gera uma URL pré-assinada pra subir uma imagem direto no R2 |
+| POST | `/uploads` | sobe uma imagem (proxy): guarda o original no R2 e gera um thumbnail 400×400 |
 
-O corpo é o `UploadRequestDTO`: `contentType` (só `image/png`, `image/jpeg` ou `image/webp`). A
-resposta (`UploadResponseDTO`) traz `uploadUrl` (URL pré-assinada — faça o `PUT` do arquivo nela
-com o mesmo `Content-Type`) e `publicUrl` (URL pública final, é ela que vai no `imageUrl` do
-produto/post). A `uploadUrl` expira em poucos minutos.
+Envie como **`multipart/form-data`** com o campo **`file`** (a imagem). Os tipos aceitos são
+`image/png`, `image/jpeg` e `image/webp`, e o tamanho máximo é **5 MB** por arquivo
+(`spring.servlet.multipart.max-file-size`). O backend faz o **proxy** do upload — recebe os bytes,
+gera o thumbnail e sobe os dois no R2 (não há mais URL pré-assinada).
+
+O thumbnail (400×400, center-crop, JPEG) é gerado pelo **worker Python** `services/Padrao-Img.py`
+via RabbitMQ RPC (fila `image.resize.request`), igual ao frete — sem o worker (ou sem
+`CLOUDAMQP_URL`) o endpoint responde **503**.
+
+A resposta (`UploadResponseDTO`) traz `imageUrl` (URL pública do original) e `thumbnailUrl` (URL
+pública do thumbnail): use o original no detalhe do produto/post e o thumbnail na vitrine/feed.
+Erros (ProblemDetail): **400** arquivo vazio ou content-type inválido, **401** sem token e **503**
+se o worker de imagem estiver indisponível.
 
 ### Users
 

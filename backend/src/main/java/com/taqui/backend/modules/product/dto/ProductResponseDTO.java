@@ -11,6 +11,7 @@ public record ProductResponseDTO(
         String productDescription,
         BigDecimal price,
         String imageUrl,
+        String thumbnailUrl,
         BigDecimal weight,
         BigDecimal width,
         BigDecimal height,
