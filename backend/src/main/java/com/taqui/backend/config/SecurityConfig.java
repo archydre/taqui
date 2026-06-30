@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/users/me").authenticated()
                         .requestMatchers(HttpMethod.GET, "/users", "/users/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/products","/products/*", "/posts", "/posts/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/posts/*/comments", "/products/*/comments").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))

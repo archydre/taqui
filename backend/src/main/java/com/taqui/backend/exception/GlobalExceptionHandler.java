@@ -1,5 +1,6 @@
 package com.taqui.backend.exception;
 
+import com.taqui.backend.modules.comment.exception.CommentNotFoundException;
 import com.taqui.backend.modules.freight.exception.FreightUnavailableException;
 import com.taqui.backend.modules.freight.exception.IncompleteFreightDataException;
 import com.taqui.backend.modules.image.exception.ImageProcessingException;
@@ -85,6 +86,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(PostNotFoundException.class)
     public ProblemDetail handlePostNotFound(PostNotFoundException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ProblemDetail handleCommentNotFound(CommentNotFoundException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 

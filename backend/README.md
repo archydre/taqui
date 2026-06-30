@@ -72,6 +72,29 @@ Os erros usam o formato ProblemDetail (RFC 7807). Os códigos: 400 quando o corp
 inválido, 401 sem token ou token inválido, 403 quando você não é o dono, 404 quando o
 recurso não existe e 409 no register quando o email ou o username já está cadastrado.
 
+### Comentários (Comments)
+
+Comentários de um post ou de um produto. Os GET são públicos (vitrine, sem login); comentar e apagar
+precisam do header `Authorization: Bearer <jwt>`.
+
+| Método | Rota | O que faz |
+|--------|------|-----------|
+| GET | `/posts/{postId}/comments` | lista os comentários de um post, paginado |
+| POST | `/posts/{postId}/comments` | comenta num post (o autor vem do token) |
+| GET | `/products/{productId}/comments` | lista os comentários de um produto, paginado |
+| POST | `/products/{productId}/comments` | comenta num produto (o autor vem do token) |
+| DELETE | `/comments/{commentId}` | apaga um comentário |
+
+O corpo de criar é o `CommentRequestDTO`: só `content` (obrigatório, até 500 caracteres). A resposta
+(`CommentResponseDTO`) traz `commentId`, o `author` (`UserPublicInfoDTO`), o `content` e o `createdAt`.
+Internamente é uma entidade `Comment` única com FKs anuláveis pra post e produto (exatamente um
+preenchido).
+
+Os GET são paginados (`?page`/`?size`, default 0/20) e devolvem um `Page` na ordem do mais novo pro
+mais antigo (`createdAt` desc); respondem **404** se o post/produto não existir. Apagar exige ser o
+**autor do comentário** ou o **dono** do post/produto (senão **403**) e responde **404** se o
+comentário não existir.
+
 ### Uploads
 
 Precisa do header `Authorization: Bearer <jwt>`.
@@ -124,7 +147,9 @@ fica no campo `pixKey`. Regras:
 - **Obrigatórios pra vender.** `POST /products` sem `whatsapp` **ou** sem `pixKey` cadastrado → **422**.
 - **Cadastrar/trocar:** `PUT /users/me` com o `UpdateMeRequestDTO` (`whatsapp`, `displayName` e/ou
   `pixKey`, todos opcionais — manda só o que quer mudar; `whatsapp` fora do padrão de dígitos → 400).
-  Devolve o `UserResponseDTO` atualizado (que pro dono inclui `whatsapp` e `pixKey`).
+  O `whatsapp` e o `pixKey` são **únicos**: se já estiverem em uso por outra conta → **409** ("Este
+  número já está sendo utilizado" / "Esta chave Pix já está sendo utilizada"). Devolve o
+  `UserResponseDTO` atualizado (que pro dono inclui `whatsapp` e `pixKey`).
 - **Revelar o número:** `GET /users/{username}/whatsapp` (autenticado — guest leva 401) devolve
   `{ username, whatsapp }`; responde 404 se o usuário não existe ou não tem número cadastrado.
 
