@@ -24,7 +24,7 @@ export function RevealWhatsapp({ username }: { username: string }) {
     return (
       <Link
         href="/entrar"
-        className="inline-flex rounded-full border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-ink/5"
+        className="inline-flex rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-ink/5"
       >
         Entre para ver o WhatsApp
       </Link>
@@ -67,9 +67,9 @@ export function RevealWhatsapp({ username }: { username: string }) {
         type="button"
         onClick={reveal}
         disabled={busy}
-        className="inline-flex rounded-full border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-ink/5 disabled:opacity-50"
+        className="inline-flex rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-ink/5 disabled:opacity-50"
       >
-        {busy ? "Mostrando…" : "Mostrar WhatsApp"}
+        {busy ? "Carregando…" : "Entrar em contato"}
       </button>
       {error ? <p className="mt-2 text-sm font-medium text-slate-700">{error}</p> : null}
     </div>

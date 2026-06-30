@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ApiError, createProduct } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { RequireAuth } from "@/components/require-auth";
 import { ImagePicker } from "@/components/image-picker";
+import { ProfileGateDialog } from "@/components/profile-gate-dialog";
 
 export default function VenderPage() {
   return (
@@ -18,7 +18,7 @@ export default function VenderPage() {
 
 function VenderForm() {
   const router = useRouter();
-  const { token } = useAuth();
+  const { token, user, refresh } = useAuth();
   const [form, setForm] = useState({
     productName: "",
     productDescription: "",
@@ -32,7 +32,8 @@ function VenderForm() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [missingProfile, setMissingProfile] = useState(false);
+  const [showGate, setShowGate] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
 
   function update(field: keyof typeof form) {
     return (
@@ -45,17 +46,11 @@ function VenderForm() {
     return Number.isFinite(n) && n > 0 ? n : undefined;
   }
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function attemptCreate() {
     if (!token) return;
     const price = Number(form.price.replace(",", "."));
-    if (!Number.isFinite(price) || price <= 0) {
-      setError("Informe um preço válido.");
-      return;
-    }
     setSubmitting(true);
     setError(null);
-    setMissingProfile(false);
     try {
       const product = await createProduct(token, {
         productName: form.productName,
@@ -71,13 +66,32 @@ function VenderForm() {
       router.push(`/produto/${product.productId}`);
     } catch (err) {
       if (err instanceof ApiError && err.status === 422) {
-        setMissingProfile(true);
-        setError(err.message);
+        setShowGate(true);
       } else {
         setError(err instanceof ApiError ? err.message : "Não foi possível anunciar devido a um erro.");
       }
       setSubmitting(false);
     }
+  }
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (imageUploading) {
+      setError("Aguarde o envio da imagem terminar.");
+      return;
+    }
+    const price = Number(form.price.replace(",", "."));
+    if (!Number.isFinite(price) || price <= 0) {
+      setError("Informe um preço válido.");
+      return;
+    }
+    await attemptCreate();
+  }
+
+  async function onProfileSaved() {
+    setShowGate(false);
+    await refresh();
+    await attemptCreate();
   }
 
   return (
@@ -132,6 +146,7 @@ function VenderForm() {
             onClear={() =>
               setForm((f) => ({ ...f, imageUrl: "", thumbnailUrl: "" }))
             }
+            onUploadingChange={setImageUploading}
           />
         </div>
 
@@ -152,24 +167,32 @@ function VenderForm() {
         </fieldset>
 
         {error ? <p className="text-sm font-medium text-slate-700">{error}</p> : null}
-        {missingProfile ? (
-          <p className="text-sm text-ink-soft">
-            Complete seu{" "}
-            <Link href="/perfil" className="font-medium text-action hover:underline">
-              perfil
-            </Link>{" "}
-            (WhatsApp e chave Pix) para poder vender.
-          </p>
-        ) : null}
 
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || imageUploading}
           className="rounded-full bg-action px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-action-strong disabled:opacity-50"
         >
-          {submitting ? "Publicando…" : "Publicar anúncio"}
+          {imageUploading
+            ? "Enviando imagem…"
+            : submitting
+              ? "Publicando…"
+              : "Publicar anúncio"}
         </button>
       </form>
+
+      {showGate ? (
+        <ProfileGateDialog
+          token={token}
+          initialWhatsapp={user?.whatsapp ?? ""}
+          initialPix={user?.pixKey ?? ""}
+          onClose={() => {
+            setShowGate(false);
+            setSubmitting(false);
+          }}
+          onSaved={onProfileSaved}
+        />
+      ) : null}
     </div>
   );
 }

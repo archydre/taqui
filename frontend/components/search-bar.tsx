@@ -6,7 +6,7 @@ export function SearchBar() {
         name="q"
         placeholder="Buscar produtos…"
         aria-label="Buscar produtos"
-        className="w-full rounded-full border border-line bg-canvas px-5 py-2.5 text-sm text-ink placeholder:text-ink-soft focus-visible:border-action focus-visible:outline-none"
+        className="w-full rounded-full border border-line bg-surface px-5 py-2.5 text-sm text-ink placeholder:text-ink-soft focus-visible:border-action focus-visible:outline-none"
       />
     </form>
   );

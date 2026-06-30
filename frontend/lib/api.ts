@@ -41,6 +41,22 @@ function stripIds(message: string): string {
   return message.replace(UUID_PATTERN, "").replace(/\s{2,}/g, " ").trim();
 }
 
+// Extrai a mensagem de um corpo ProblemDetail: detail/message direto, ou o
+// mapa "errors" das falhas de validação (MethodArgumentNotValidException).
+function messageFromProblem(problem: unknown): string | null {
+  if (!problem || typeof problem !== "object") return null;
+  const p = problem as Record<string, unknown>;
+  const direct = p.detail ?? p.message;
+  if (typeof direct === "string" && direct.trim()) return direct;
+  if (p.errors && typeof p.errors === "object") {
+    const msgs = Object.values(p.errors as Record<string, unknown>).filter(
+      (v): v is string => typeof v === "string" && v.trim().length > 0,
+    );
+    if (msgs.length) return msgs.join(" ");
+  }
+  return null;
+}
+
 // Callback disparado quando uma chamada autenticada recebe 401 (token inválido/expirado).
 let onUnauthorized: (() => void) | null = null;
 
@@ -64,11 +80,8 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     if (res.status === 401 && token) onUnauthorized?.();
     let detail = statusMessage(res.status);
     try {
-      const problem = await res.json();
-      const fromBody = problem?.detail ?? problem?.message;
-      if (typeof fromBody === "string" && fromBody.trim()) {
-        detail = stripIds(fromBody) || detail;
-      }
+      const fromBody = messageFromProblem(await res.json());
+      if (fromBody) detail = stripIds(fromBody) || detail;
     } catch {
       // resposta sem corpo JSON: mantém a mensagem amigável
     }
@@ -278,11 +291,8 @@ export async function uploadImage(token: string, file: File): Promise<UploadResu
     if (res.status === 401 && token) onUnauthorized?.();
     let detail = statusMessage(res.status);
     try {
-      const problem = await res.json();
-      const fromBody = problem?.detail ?? problem?.message;
-      if (typeof fromBody === "string" && fromBody.trim()) {
-        detail = stripIds(fromBody) || detail;
-      }
+      const fromBody = messageFromProblem(await res.json());
+      if (fromBody) detail = stripIds(fromBody) || detail;
     } catch {
       // resposta sem corpo JSON: mantém a mensagem amigável
     }

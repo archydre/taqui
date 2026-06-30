@@ -12,6 +12,7 @@ type Props = {
   imageUrl: string | null;
   onUploaded: (urls: UploadResult) => void;
   onClear: () => void;
+  onUploadingChange?: (uploading: boolean) => void;
   disabled?: boolean;
 };
 
@@ -20,6 +21,7 @@ export function ImagePicker({
   imageUrl,
   onUploaded,
   onClear,
+  onUploadingChange,
   disabled,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -53,6 +55,7 @@ export function ImagePicker({
     setPreview(URL.createObjectURL(file));
     setError(null);
     setUploading(true);
+    onUploadingChange?.(true);
     try {
       onUploaded(await uploadImage(token, file));
     } catch (err) {
@@ -63,6 +66,7 @@ export function ImagePicker({
       onClear();
     } finally {
       setUploading(false);
+      onUploadingChange?.(false);
     }
   }
 

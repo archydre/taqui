@@ -4,6 +4,7 @@ import { formatPrice } from "@/lib/format";
 import { Avatar } from "@/components/avatar";
 import { RevealWhatsapp } from "@/components/reveal-whatsapp";
 import { ProductOwnerActions } from "@/components/product-owner-actions";
+import { BuyButton } from "@/components/buy-button";
 
 export default async function ProdutoPage({
   params,
@@ -66,7 +67,7 @@ export default async function ProdutoPage({
 
         <Link
           href={`/u/${product.owner.username}`}
-          className="mt-6 flex items-center gap-3 rounded-xl border border-line p-3 hover:bg-ink/5"
+          className="mt-6 flex items-center gap-3 rounded-xl border border-line bg-surface p-3 hover:bg-ink/5"
         >
           <Avatar name={product.owner.displayName} seed={product.owner.username} />
           <div className="min-w-0">
@@ -80,12 +81,10 @@ export default async function ProdutoPage({
         </Link>
 
         <div className="mt-6 flex flex-col gap-3">
-          <Link
-            href={`/produto/${product.productId}/comprar`}
-            className="rounded-full bg-action px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-action-strong"
-          >
-            Comprar
-          </Link>
+          <BuyButton
+            productId={product.productId}
+            ownerUsername={product.owner.username}
+          />
           {product.owner.hasWhatsapp ? (
             <RevealWhatsapp username={product.owner.username} />
           ) : null}

@@ -37,10 +37,11 @@ export default function ComprarPage({
 
 function Checkout({ productId }: { productId: string }) {
   const router = useRouter();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loadError, setLoadError] = useState(false);
+  const isOwner = !!product && !!user && user.username === product.owner.username;
   const [quantity, setQuantity] = useState(1);
   const [address, setAddress] = useState({
     recipientName: "",
@@ -66,6 +67,10 @@ function Checkout({ productId }: { productId: string }) {
       .then(setProduct)
       .catch(() => setLoadError(true));
   }, [productId]);
+
+  useEffect(() => {
+    if (isOwner) router.replace(`/produto/${productId}`);
+  }, [isOwner, productId, router]);
 
   function updateAddress(field: keyof typeof address) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -138,7 +143,7 @@ function Checkout({ productId }: { productId: string }) {
   if (loadError) {
     return <p className="py-8 text-ink-soft">Não foi possível carregar o produto.</p>;
   }
-  if (!product) {
+  if (!product || isOwner) {
     return <p className="py-8 text-ink-soft">Carregando…</p>;
   }
 

@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { ApiError, createPost } from "@/lib/api";
 import { Avatar } from "./avatar";
 import { ImagePicker } from "./image-picker";
+import { IconImagePlus } from "./icons";
 
 export function Composer() {
   const { user, token, loading } = useAuth();
@@ -16,6 +17,7 @@ export function Composer() {
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [showImage, setShowImage] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (loading) {
@@ -50,6 +52,10 @@ export function Composer() {
 
   async function publish() {
     if (!token) return;
+    if (imageUploading) {
+      setError("Aguarde o envio da imagem terminar.");
+      return;
+    }
     const trimmed = content.trim();
     if (!trimmed && !imageUrl) {
       setError("Escreva algo ou adicione uma imagem.");
@@ -102,13 +108,14 @@ export function Composer() {
                   setImageUrl(null);
                   setThumbnailUrl(null);
                 }}
+                onUploadingChange={setImageUploading}
               />
             </div>
           ) : null}
 
           {error ? <p className="mt-2 text-sm font-medium text-slate-700">{error}</p> : null}
 
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-3 flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={() => {
@@ -118,17 +125,26 @@ export function Composer() {
                 }
                 setShowImage((v) => !v);
               }}
-              className="rounded-full px-3 py-1.5 text-sm font-medium text-ink-soft hover:bg-ink/5 hover:text-ink"
+              aria-label={showImage ? "Remover imagem" : "Adicionar imagem"}
+              aria-pressed={showImage}
+              title={showImage ? "Remover imagem" : "Adicionar imagem"}
+              className={`grid h-9 w-9 place-items-center rounded-full transition-colors hover:bg-ink/5 ${
+                showImage ? "text-action" : "text-ink-soft hover:text-ink"
+              }`}
             >
-              {showImage ? "Remover imagem" : "Adicionar imagem"}
+              <IconImagePlus className="h-5 w-5" />
             </button>
             <button
               type="button"
               onClick={publish}
-              disabled={submitting}
+              disabled={submitting || imageUploading}
               className="rounded-full bg-action px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-action-strong disabled:opacity-50"
             >
-              {submitting ? "Publicando…" : "Publicar"}
+              {imageUploading
+                ? "Enviando imagem…"
+                : submitting
+                  ? "Publicando…"
+                  : "Publicar"}
             </button>
           </div>
         </div>

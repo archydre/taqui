@@ -40,6 +40,7 @@ function EditarForm() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [imageUploading, setImageUploading] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -85,6 +86,10 @@ function EditarForm() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!token || !product) return;
+    if (imageUploading) {
+      setError("Aguarde o envio da imagem terminar.");
+      return;
+    }
     const price = Number(form.price.replace(",", "."));
     if (!Number.isFinite(price) || price <= 0) {
       setError("Informe um preço válido.");
@@ -177,6 +182,7 @@ function EditarForm() {
             onClear={() =>
               setForm((f) => ({ ...f, imageUrl: "", thumbnailUrl: "" }))
             }
+            onUploadingChange={setImageUploading}
           />
         </div>
 
@@ -201,10 +207,14 @@ function EditarForm() {
         <div className="flex gap-3">
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || imageUploading}
             className="flex-1 rounded-full bg-action px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-action-strong disabled:opacity-50"
           >
-            {submitting ? "Salvando…" : "Salvar alterações"}
+            {imageUploading
+              ? "Enviando imagem…"
+              : submitting
+                ? "Salvando…"
+                : "Salvar alterações"}
           </button>
           <button
             type="button"
