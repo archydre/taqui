@@ -1,0 +1,51 @@
+# Stack completa do taqui (db + back + front).
+# Para subir tudo:  docker compose up --build
+# (Separado de backend/docker-compose.yml, que so tem o Postgres do fluxo mvnw.)
+
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: taqui
+      POSTGRES_USER: taqui
+      POSTGRES_PASSWORD: taqui
+    ports:
+      - "5432:5432"
+    volumes:
+      - taqui-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taqui"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/taqui
+      SPRING_DATASOURCE_USERNAME: taqui
+      SPRING_DATASOURCE_PASSWORD: taqui
+      SPRING_DOCKER_COMPOSE_ENABLED: "false"
+      JWT_SECRET: troque-por-uma-string-secreta-bem-longa-de-no-minimo-32-bytes
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  taqui-pgdata:
