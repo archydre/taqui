@@ -114,11 +114,12 @@ def build_email_html(nome: str, link: str) -> str:
 """
 
 def send_verification_email(dest_email: str, nome: str, token: str):
-    link - f"{BASE_URL}/verify?token={token}"
+    link = f"{BASE_URL}/verify?token={token}"
 
-    msg["subject"]  = MIMEMultipart("alternative")
-    msg["From"]     = "Confirme seu email - TAQUI"
-    msg["To"]       = dest_email
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = "Confirme seu email - TAQUI"
+    msg["From"]    = GMAIL_USER
+    msg["To"]      = dest_email
 
     html_part = MIMEText(build_email_html(nome, link), "html", "utf-8")
     msg.attach(html_part)
@@ -127,7 +128,7 @@ def send_verification_email(dest_email: str, nome: str, token: str):
         server.login(GMAIL_USER, GMAIL_PASSWORD)
         server.sendmail(GMAIL_USER, dest_email, msg.as_string())
 
-    log.info("Email enviado para %s | link-%s", dest_email, link)
+    log.info("Email enviado para %s | link=%s", dest_email, link)
 
 def on_request(channel, method, props, body):
 
@@ -154,7 +155,7 @@ def on_request(channel, method, props, body):
     channel.basic_publish(
         exchange="",
         routing_key=props.reply_to,
-        proprieties=pika.BasicProperties(
+        properties=pika.BasicProperties(
             correlation_id=correlation_id,
             content_type="application/json",
             headers=error_header or {}

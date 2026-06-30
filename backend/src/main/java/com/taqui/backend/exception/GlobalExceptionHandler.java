@@ -2,12 +2,14 @@ package com.taqui.backend.exception;
 
 import com.taqui.backend.modules.freight.exception.FreightUnavailableException;
 import com.taqui.backend.modules.freight.exception.IncompleteFreightDataException;
+import com.taqui.backend.modules.image.exception.ImageProcessingException;
 import com.taqui.backend.modules.order.exception.InvalidOrderStateException;
 import com.taqui.backend.modules.order.exception.OrderNotFoundException;
 import com.taqui.backend.modules.order.exception.SelfPurchaseException;
 import com.taqui.backend.modules.product.exception.ProductNotFoundException;
 import com.taqui.backend.modules.post.exception.InvalidPostException;
 import com.taqui.backend.modules.post.exception.PostNotFoundException;
+import com.taqui.backend.modules.storage.exception.InvalidUploadException;
 import com.taqui.backend.modules.user.exception.ContactUnavailableException;
 import com.taqui.backend.modules.user.exception.EmailAlreadyExistsException;
 import com.taqui.backend.modules.user.exception.PixKeyRequiredException;
@@ -117,5 +119,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PixKeyRequiredException.class)
     public ProblemDetail handlePixKeyRequired(PixKeyRequiredException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
+    @ExceptionHandler(ImageProcessingException.class)
+    public ProblemDetail handleImageProcessing(ImageProcessingException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidUploadException.class)
+    public ProblemDetail handleInvalidUpload(InvalidUploadException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }
