@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { Avatar } from "./avatar";
 import { SearchBar } from "./search-bar";
+import { RecommendedUsers } from "./recommended-users";
 
 export function ProfileSidebar() {
   const { user, loading, logout } = useAuth();
@@ -14,7 +15,7 @@ export function ProfileSidebar() {
     <div className="flex flex-col gap-8 py-6">
       <SearchBar />
 
-      <div className="flex flex-1 items-center">
+      <div className="flex flex-1 items-start">
         <div className="w-full">
           {loading ? (
             <div className="animate-pulse rounded-2xl border border-line bg-surface p-4">
@@ -68,6 +69,8 @@ export function ProfileSidebar() {
               </div>
             </div>
           )}
+
+          <RecommendedUsers excludeUsername={user?.username} />
         </div>
       </div>
 
