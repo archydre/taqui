@@ -17,16 +17,20 @@ export function RecommendedUsers({ excludeUsername }: { excludeUsername?: string
         const page = await getProducts({ size: 50 });
         if (!active) return;
         const seen = new Set<string>();
-        const recs: Owner[] = [];
+        const owners: Owner[] = [];
         for (const product of page.content) {
           const owner = product.owner;
           if (owner.username === excludeUsername) continue;
           if (seen.has(owner.username)) continue;
           seen.add(owner.username);
-          recs.push(owner);
-          if (recs.length >= 4) break;
+          owners.push(owner);
         }
-        setUsers(recs);
+        // embaralha (Fisher-Yates) pra variar a recomendação a cada carregamento
+        for (let i = owners.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [owners[i], owners[j]] = [owners[j], owners[i]];
+        }
+        setUsers(owners.slice(0, 4));
       } catch {
         // silencioso: some a seção se falhar
       } finally {
