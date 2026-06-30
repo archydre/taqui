@@ -1,6 +1,16 @@
 export default function Loading() {
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-4">
+      <div className="rounded-2xl border border-line bg-surface p-5 shadow-sm">
+        <div className="flex gap-3">
+          <div className="h-10 w-10 animate-pulse rounded-full bg-line" />
+          <div className="flex-1">
+            <div className="h-4 w-2/3 animate-pulse rounded bg-line" />
+            <div className="mt-3 ml-auto h-9 w-28 animate-pulse rounded-full bg-line" />
+          </div>
+        </div>
+      </div>
+
       {Array.from({ length: 4 }).map((_, i) => (
         <div
           key={i}
