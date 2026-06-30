@@ -6,7 +6,7 @@ import { ApiError, revealWhatsapp } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
 export function RevealWhatsapp({ username }: { username: string }) {
-  const { token, loading } = useAuth();
+  const { user, token, loading } = useAuth();
   const [number, setNumber] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,6 +19,8 @@ export function RevealWhatsapp({ username }: { username: string }) {
       />
     );
   }
+
+  if (user && user.username === username) return null;
 
   if (!token) {
     return (
