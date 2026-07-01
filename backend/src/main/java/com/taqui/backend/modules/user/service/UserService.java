@@ -18,6 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Set;
 import java.util.UUID;
 
@@ -45,6 +47,9 @@ public class UserService {
         }
         User createdUser = userMapper.toEntity(registerRequestDTO);
         createdUser.setPassword(passwordEncoder.encode(createdUser.getPassword()));
+        createdUser.setEmailVerified(false);
+        createdUser.setVerificationToken(UUID.randomUUID().toString());
+        createdUser.setVerificationTokenExpiresAt(Instant.now().plus(24, ChronoUnit.HOURS));
         return userRepository.save(createdUser);
     }
 

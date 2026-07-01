@@ -12,6 +12,7 @@ import com.taqui.backend.modules.storage.service.StorageService;
 import com.taqui.backend.modules.user.entity.User;
 import com.taqui.backend.modules.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -60,6 +61,9 @@ public abstract class AbstractIntegrationTest {
     @Autowired protected PostRepository postRepository;
     @Autowired protected OrderRepository orderRepository;
     @Autowired protected PasswordEncoder passwordEncoder;
+
+    // Sem broker nos testes: mockar evita bater no RabbitMQ (e mandar email real) no fluxo de registro.
+    @MockitoBean protected RabbitTemplate rabbitTemplate;
 
     // Mockado pra não bater no R2 real; os testes verificam as chamadas de limpeza.
     @MockitoBean protected StorageService storageService;
