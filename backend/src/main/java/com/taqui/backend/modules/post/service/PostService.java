@@ -8,6 +8,7 @@ import com.taqui.backend.modules.post.mapper.PostMapper;
 import com.taqui.backend.modules.post.repository.PostRepository;
 import com.taqui.backend.modules.product.entity.Product;
 import com.taqui.backend.modules.product.service.ProductService;
+import com.taqui.backend.modules.storage.service.StorageService;
 import com.taqui.backend.modules.user.exception.UserNotFoundException;
 import com.taqui.backend.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class PostService {
     private final PostMapper postMapper;
     private final UserRepository userRepository;
     private final ProductService productService;
+    private final StorageService storageService;
 
     @Transactional(readOnly = true)
     public Post findPostById(UUID postId) {
@@ -72,7 +74,16 @@ public class PostService {
         boolean isAnuncio = post.getProduct() != null;   // o tipo do post não muda no update
         validateContent(dto.content(), dto.imageUrl(), isAnuncio);
 
+        String oldImage = post.getImageUrl();
+        String oldThumb = post.getThumbnailUrl();
         postMapper.updateEntityFromDTO(dto, post);        // productId é ignorado de propósito
+
+        // Trocou por uma imagem nova e diferente? A antiga vira órfã no bucket -> apaga.
+        String newImage = post.getImageUrl();
+        if (newImage != null && !newImage.isBlank() && !newImage.equals(oldImage)) {
+            storageService.deleteObject(oldImage);
+            storageService.deleteObject(oldThumb);
+        }
         return post;
     }
 
@@ -80,6 +91,8 @@ public class PostService {
     public void deletePost(UUID postId, UUID ownerId) {
         Post post = findPostById(postId);
         checkOwnership(post, ownerId);
+        storageService.deleteObject(post.getImageUrl());
+        storageService.deleteObject(post.getThumbnailUrl());
         postRepository.delete(post);
     }
 
