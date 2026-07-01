@@ -43,8 +43,14 @@ export default async function Explorar({
         </p>
       ) : (
         <div className="grid grid-cols-2 gap-5 lg:grid-cols-3">
-          {products.map((product) => (
-            <ProductCardExpanded key={product.productId} product={product} />
+          {products.map((product, i) => (
+            <div
+              key={product.productId}
+              className="animate-fade-in-up"
+              style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
+            >
+              <ProductCardExpanded product={product} />
+            </div>
           ))}
         </div>
       )}

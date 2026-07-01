@@ -45,7 +45,7 @@ export function RecommendedUsers({ excludeUsername }: { excludeUsername?: string
   if (loading || users.length === 0) return null;
 
   return (
-    <div className="mt-8">
+    <div className="mt-8 animate-fade-in">
       <p className="mb-3 text-sm font-semibold text-ink">Recomendações para você</p>
       <ul className="flex flex-col gap-3">
         {users.map((u) => (

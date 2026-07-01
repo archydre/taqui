@@ -43,8 +43,14 @@ export function Feed() {
 
   return (
     <div className="flex flex-col gap-4">
-      {posts.map((post) => (
-        <PostCard key={post.postId} post={post} />
+      {posts.map((post, i) => (
+        <div
+          key={post.postId}
+          className="animate-fade-in-up"
+          style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
+        >
+          <PostCard post={post} />
+        </div>
       ))}
     </div>
   );

@@ -1,62 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 
-const VISITS_KEY = "taqui_welcome_visits";
-const OFF_KEY = "taqui_welcome_off";
 const authRoutes = ["/entrar", "/cadastrar"];
 
-// Lê o contador e decide se mostra (1ª, 4ª, 7ª… = uma a cada 3). Só leitura.
-function decide(): { show: boolean; nextVisits: number } {
-  if (typeof window === "undefined") return { show: false, nextVisits: 0 };
-  try {
-    if (window.localStorage.getItem(OFF_KEY) === "1") {
-      return { show: false, nextVisits: 0 };
-    }
-    const visits = Number(window.localStorage.getItem(VISITS_KEY) ?? "0") + 1;
-    return { show: visits % 3 === 1, nextVisits: visits };
-  } catch {
-    return { show: false, nextVisits: 0 };
-  }
+// Quem decide se mostra é o script inline do layout (roda antes da pintura e
+// marca html.welcome-open). Aqui só lemos essa classe, sem flash de hidratação.
+function subscribe() {
+  return () => {};
+}
+function isOpen() {
+  return document.documentElement.classList.contains("welcome-open");
 }
 
-export function WelcomeModal() {
-  const { user, loading } = useAuth();
+export function WelcomeModal({ onReveal }: { onReveal?: () => void }) {
+  const { user } = useAuth();
   const pathname = usePathname();
-
-  if (loading || user || authRoutes.includes(pathname)) return null;
-  return <WelcomeDialog />;
-}
-
-function WelcomeDialog() {
-  const [info] = useState(decide);
+  const open = useSyncExternalStore(subscribe, isOpen, () => false);
   const [dismissed, setDismissed] = useState(false);
 
-  useEffect(() => {
-    if (info.nextVisits > 0) {
-      try {
-        window.localStorage.setItem(VISITS_KEY, String(info.nextVisits));
-      } catch {
-        // localStorage indisponível: ignora
-      }
-    }
-  }, [info]);
+  if (user || authRoutes.includes(pathname) || !open || dismissed) return null;
 
-  if (!info.show || dismissed) return null;
-
-  function close() {
-    setDismissed(true);
-  }
-
-  function dontShowAgain() {
+  // Saída explícita (Entrar / Criar conta / Continuar) encerra o "ativo".
+  function leave() {
+    document.documentElement.classList.remove("welcome-open");
     try {
-      window.localStorage.setItem(OFF_KEY, "1");
+      window.localStorage.setItem("taqui_welcome_active", "0");
     } catch {
       // ignora
     }
+  }
+
+  function close() {
+    leave();
+    onReveal?.();
     setDismissed(true);
   }
 
@@ -65,17 +45,8 @@ function WelcomeDialog() {
       <div
         role="dialog"
         aria-modal="true"
-        className="relative w-full max-w-sm rounded-2xl border border-line bg-surface p-8 text-center shadow-xl"
+        className="relative w-full max-w-sm animate-scale-in rounded-2xl border border-line bg-surface p-8 text-center shadow-xl"
       >
-        <button
-          type="button"
-          onClick={close}
-          aria-label="Fechar"
-          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full text-ink-soft hover:bg-ink/5"
-        >
-          ✕
-        </button>
-
         <div className="flex items-center justify-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -98,13 +69,15 @@ function WelcomeDialog() {
         <div className="mt-6 flex flex-col gap-2">
           <Link
             href="/cadastrar"
+            onClick={leave}
             className="rounded-full bg-action px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-action-strong"
           >
             Criar conta
           </Link>
           <Link
             href="/entrar"
-            className="rounded-full border border-line bg-surface px-5 py-2.5 text-sm font-medium text-ink hover:bg-ink/5"
+            onClick={leave}
+            className="rounded-full border-2 border-line bg-surface px-5 py-2.5 text-sm font-medium text-ink hover:bg-ink/5"
           >
             Entrar
           </Link>
@@ -116,14 +89,6 @@ function WelcomeDialog() {
             Continuar sem conta
           </button>
         </div>
-
-        <button
-          type="button"
-          onClick={dontShowAgain}
-          className="mt-4 text-xs text-ink-soft underline hover:text-ink"
-        >
-          Não mostrar novamente
-        </button>
       </div>
     </div>
   );

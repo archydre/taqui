@@ -44,12 +44,12 @@ export function ProfileGateDialog({
         type="button"
         aria-label="Fechar"
         onClick={onClose}
-        className="absolute inset-0 bg-ink/40"
+        className="absolute inset-0 bg-ink/40 animate-fade-in"
       />
       <div
         role="dialog"
         aria-modal="true"
-        className="relative w-full max-w-sm rounded-2xl border border-line bg-surface p-6 shadow-xl"
+        className="relative w-full max-w-sm animate-scale-in rounded-2xl border border-line bg-surface p-6 shadow-xl"
       >
         <h2 className="font-display text-lg font-semibold text-ink">
           Falta pouco para vender

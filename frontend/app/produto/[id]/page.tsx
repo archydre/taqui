@@ -36,7 +36,7 @@ export default async function ProdutoPage({
 
   return (
     <div className="mx-auto w-full max-w-4xl py-4">
-      <div className="grid gap-8 md:grid-cols-2">
+      <div className="grid animate-fade-in-up gap-8 md:grid-cols-2">
       <div className="overflow-hidden rounded-2xl border border-line bg-surface">
         <div className="aspect-square bg-line">
           {product.imageUrl ? (
@@ -88,7 +88,10 @@ export default async function ProdutoPage({
       </div>
       </div>
 
-      <section className="mt-8">
+      <section
+        className="mt-8 animate-fade-in-up"
+        style={{ animationDelay: "80ms" }}
+      >
         <h2 className="font-display text-xl font-semibold text-ink">
           Descrição do produto
         </h2>
@@ -101,7 +104,10 @@ export default async function ProdutoPage({
         )}
       </section>
 
-      <section className="mt-8 border-t border-line pt-8">
+      <section
+        className="mt-8 animate-fade-in-up border-t border-line pt-8"
+        style={{ animationDelay: "160ms" }}
+      >
         <h2 className="font-display text-xl font-semibold text-ink">Comentários</h2>
         <CommentsSection
           target="product"

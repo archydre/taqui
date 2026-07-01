@@ -48,7 +48,7 @@ export function Composer() {
 
   if (!user || !token) {
     return (
-      <div className="mb-4 rounded-2xl border border-line bg-surface p-5 text-center shadow-sm">
+      <div className="mb-4 animate-fade-in rounded-2xl border border-line bg-surface p-5 text-center shadow-sm">
         <p className="text-ink-soft">
           {feedCtaVariant === 0
             ? "Quer anunciar um produto? Clique "
@@ -93,7 +93,7 @@ export function Composer() {
   }
 
   return (
-    <div className="mb-4 rounded-2xl border border-line bg-surface p-5 shadow-sm">
+    <div className="mb-4 animate-fade-in rounded-2xl border border-line bg-surface p-5 shadow-sm">
       <div className="flex gap-3">
         <Avatar name={user.displayName} seed={user.username} />
         <div className="flex-1">

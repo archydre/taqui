@@ -161,12 +161,12 @@ export function CommentsSection({
           ) : null}
 
           {token ? (
-            <form onSubmit={submit} className="mt-3 flex items-center gap-2">
+            <form onSubmit={submit} className="mt-4 flex items-center gap-2">
               <input
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 maxLength={500}
-                placeholder="Escreva um comentário…"
+                placeholder="Comente…"
                 className="min-w-0 flex-1 rounded-full border border-line bg-surface px-4 py-2 text-sm text-ink placeholder:text-ink-soft focus-visible:border-action focus-visible:outline-none"
               />
               <button
@@ -180,10 +180,10 @@ export function CommentsSection({
               </button>
             </form>
           ) : (
-            <div className="mt-3 flex items-center gap-2">
+            <div className="mt-10 flex items-center gap-2">
               <input
                 readOnly
-                placeholder="Escreva um comentário…"
+                placeholder="Comente…"
                 onClick={() => router.push("/entrar")}
                 className="min-w-0 flex-1 cursor-pointer rounded-full border border-line bg-surface px-4 py-2 text-sm text-ink placeholder:text-ink-soft focus-visible:border-action focus-visible:outline-none"
               />

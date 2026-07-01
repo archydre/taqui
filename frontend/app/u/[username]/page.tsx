@@ -85,12 +85,17 @@ export default async function PerfilPublico({
           <p className="text-ink-soft">Nenhum produto à venda.</p>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-            {products.map((product) => (
-              <ProductCard
+            {products.map((product, i) => (
+              <div
                 key={product.productId}
-                product={product}
-                commentCount={commentCounts[product.productId]}
-              />
+                className="animate-fade-in-up"
+                style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
+              >
+                <ProductCard
+                  product={product}
+                  commentCount={commentCounts[product.productId]}
+                />
+              </div>
             ))}
           </div>
         )}
@@ -104,8 +109,14 @@ export default async function PerfilPublico({
           <p className="text-ink-soft">Nenhuma publicação ainda.</p>
         ) : (
           <div className="flex flex-col gap-4">
-            {posts.map((post) => (
-              <PostCard key={post.postId} post={post} />
+            {posts.map((post, i) => (
+              <div
+                key={post.postId}
+                className="animate-fade-in-up"
+                style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
+              >
+                <PostCard post={post} />
+              </div>
             ))}
           </div>
         )}

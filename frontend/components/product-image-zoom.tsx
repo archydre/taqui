@@ -43,7 +43,7 @@ export function ProductImageZoom({ src, alt }: { src: string; alt: string }) {
 
       {open ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/80 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/80 p-4 animate-fade-in"
           onClick={close}
         >
           <button
@@ -55,7 +55,7 @@ export function ProductImageZoom({ src, alt }: { src: string; alt: string }) {
             ✕
           </button>
 
-          <div className="max-h-[90vh] max-w-[90vw] overflow-hidden rounded-lg">
+          <div className="max-h-[90vh] max-w-[90vw] animate-scale-in overflow-hidden rounded-lg">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={src}

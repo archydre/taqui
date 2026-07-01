@@ -26,7 +26,7 @@ export function ProfileSidebar() {
               </div>
             </div>
           ) : user ? (
-            <div className="flex items-center gap-3">
+            <div className="flex animate-fade-in items-center gap-3">
               <Link href={`/u/${user.username}`} className="shrink-0">
                 <Avatar name={user.displayName} seed={user.username} size={48} />
               </Link>
@@ -51,7 +51,7 @@ export function ProfileSidebar() {
               </button>
             </div>
           ) : (
-            <div className="rounded-2xl border border-line bg-surface p-4 text-center">
+            <div className="animate-fade-in rounded-2xl border border-line bg-surface p-4 text-center">
               <p className="text-sm text-ink-soft">Entre para publicar e vender.</p>
               <div className="mt-3 flex flex-col gap-2">
                 <Link
