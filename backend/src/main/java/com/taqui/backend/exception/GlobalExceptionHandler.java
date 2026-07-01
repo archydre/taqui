@@ -1,5 +1,7 @@
 package com.taqui.backend.exception;
 
+import com.taqui.backend.modules.auth.exception.EmailDeliveryException;
+import com.taqui.backend.modules.auth.exception.InvalidVerificationTokenException;
 import com.taqui.backend.modules.comment.exception.CommentNotFoundException;
 import com.taqui.backend.modules.freight.exception.FreightUnavailableException;
 import com.taqui.backend.modules.freight.exception.IncompleteFreightDataException;
@@ -147,5 +149,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidUploadException.class)
     public ProblemDetail handleInvalidUpload(InvalidUploadException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidVerificationTokenException.class)
+    public ProblemDetail handleInvalidVerificationToken(InvalidVerificationTokenException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(EmailDeliveryException.class)
+    public ProblemDetail handleEmailDelivery(EmailDeliveryException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
     }
 }
