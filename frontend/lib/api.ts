@@ -245,6 +245,10 @@ export function register(input: RegisterInput): Promise<unknown> {
   return request("/auth/register", { method: "POST", body: input });
 }
 
+export function verifyEmail(token: string): Promise<void> {
+  return request(`/auth/verify?token=${encodeURIComponent(token)}`, { method: "POST" });
+}
+
 // ---- Usuário ----
 
 export function getMe(token: string): Promise<Me> {
