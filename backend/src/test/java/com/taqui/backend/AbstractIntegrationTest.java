@@ -8,6 +8,7 @@ import com.taqui.backend.modules.order.repository.OrderRepository;
 import com.taqui.backend.modules.post.repository.PostRepository;
 import com.taqui.backend.modules.product.entity.Product;
 import com.taqui.backend.modules.product.repository.ProductRepository;
+import com.taqui.backend.modules.storage.service.StorageService;
 import com.taqui.backend.modules.user.entity.User;
 import com.taqui.backend.modules.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -58,6 +60,9 @@ public abstract class AbstractIntegrationTest {
     @Autowired protected PostRepository postRepository;
     @Autowired protected OrderRepository orderRepository;
     @Autowired protected PasswordEncoder passwordEncoder;
+
+    // Mockado pra não bater no R2 real; os testes verificam as chamadas de limpeza.
+    @MockitoBean protected StorageService storageService;
 
     @BeforeEach
     void cleanDatabase() {
