@@ -207,6 +207,7 @@ sem carrinho. Todas as rotas precisam do header `Authorization: Bearer <jwt>`.
 | GET | `/orders` | meus pedidos como comprador, paginado |
 | GET | `/orders/received` | pedidos recebidos como vendedor, paginado |
 | GET | `/orders/{orderId}` | um pedido (só o comprador ou o vendedor dele) |
+| GET | `/orders/{orderId}/pix-qr` | o "Pix Copia e Cola" (BR Code) do pedido, pra pagar por QR Code |
 | POST | `/orders/{orderId}/confirm-payment` | o vendedor confirma o Pix recebido |
 | POST | `/orders/{orderId}/ship` | o vendedor marca como enviado (só se já `PAGO`) |
 | POST | `/orders/{orderId}/cancel` | comprador ou vendedor cancela (enquanto não enviado) |
