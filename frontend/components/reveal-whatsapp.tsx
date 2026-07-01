@@ -1,0 +1,70 @@
+"use client";
+
+import { useState } from "react";
+import { ApiError, revealWhatsapp } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+
+export function RevealWhatsapp({ username }: { username: string }) {
+  const { user, token, loading } = useAuth();
+  const [number, setNumber] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (loading) {
+    return (
+      <div
+        className="h-9 w-44 animate-pulse rounded-full bg-line"
+        aria-hidden="true"
+      />
+    );
+  }
+
+  if (user && user.username === username) return null;
+
+  // Guest não tem opção de contato.
+  if (!token) return null;
+
+  if (number) {
+    const digits = number.replace(/\D/g, "");
+    return (
+      <a
+        href={`https://wa.me/${digits}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex rounded-full bg-price px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+      >
+        Conversar no WhatsApp
+      </a>
+    );
+  }
+
+  async function reveal() {
+    if (!token) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await revealWhatsapp(token, username);
+      setNumber(res.whatsapp);
+    } catch (err) {
+      setError(
+        err instanceof ApiError ? err.message : "Não deu para mostrar o número.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={reveal}
+        disabled={busy}
+        className="inline-flex rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-ink/5 disabled:opacity-50"
+      >
+        {busy ? "Carregando…" : "Entrar em contato"}
+      </button>
+      {error ? <p className="mt-2 text-sm font-medium text-slate-700">{error}</p> : null}
+    </div>
+  );
+}

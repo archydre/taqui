@@ -15,6 +15,10 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsByUsername(String username);
 
+    boolean existsByWhatsappAndUserIdNot(String whatsapp, UUID userId);
+
+    boolean existsByPixKeyAndUserIdNot(String pixKey, UUID userId);
+
     Optional<User> findByEmail(String email);
 
     Optional<User> findByUsername(String username);

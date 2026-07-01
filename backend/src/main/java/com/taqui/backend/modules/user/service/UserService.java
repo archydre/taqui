@@ -8,8 +8,10 @@ import lombok.RequiredArgsConstructor;
 import com.taqui.backend.modules.user.entity.User;
 import com.taqui.backend.modules.user.exception.ContactUnavailableException;
 import com.taqui.backend.modules.user.exception.EmailAlreadyExistsException;
+import com.taqui.backend.modules.user.exception.PixKeyAlreadyExistsException;
 import com.taqui.backend.modules.user.exception.UsernameAlreadyExistsException;
 import com.taqui.backend.modules.user.exception.UserNotFoundException;
+import com.taqui.backend.modules.user.exception.WhatsappAlreadyExistsException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -60,12 +62,18 @@ public class UserService {
     public User updateMe(UUID userId, UpdateMeRequestDTO updateMeRequestDTO) {
         User user = findUserById(userId);
         if (updateMeRequestDTO.whatsapp() != null) {
+            if (userRepository.existsByWhatsappAndUserIdNot(updateMeRequestDTO.whatsapp(), userId)) {
+                throw new WhatsappAlreadyExistsException("Este número já está sendo utilizado");
+            }
             user.setWhatsapp(updateMeRequestDTO.whatsapp());
         }
         if (updateMeRequestDTO.displayName() != null) {
             user.setDisplayName(updateMeRequestDTO.displayName());
         }
         if (updateMeRequestDTO.pixKey() != null) {
+            if (userRepository.existsByPixKeyAndUserIdNot(updateMeRequestDTO.pixKey(), userId)) {
+                throw new PixKeyAlreadyExistsException("Esta chave Pix já está sendo utilizada");
+            }
             user.setPixKey(updateMeRequestDTO.pixKey());
         }
         if (updateMeRequestDTO.postalCode() != null) {
