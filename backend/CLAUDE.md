@@ -30,7 +30,7 @@ PostgreSQL is provided by `docker-compose.yml` (db/user/password all `taqui`, po
 
 Because the `spring-boot-docker-compose` dependency is present, `spring-boot:run` **automatically starts the compose stack** and stops it when the app exits — no manual `docker compose up` needed. This requires Docker Desktop to be running. Connection details are still set explicitly in `application.properties`.
 
-`spring.jpa.hibernate.ddl-auto=update` means Hibernate creates/updates tables from entities automatically — there are no migration scripts.
+**Flyway owns the schema.** Migrations live in `src/main/resources/db/migration` (`V1__init.sql` is the baseline, extracted from the schema Hibernate generates for the current entities). Flyway runs them on startup; `spring.jpa.hibernate.ddl-auto=validate` makes Hibernate only *check* that the entities match the Flyway-created schema — it never creates or alters a table. Every schema change is a new versioned migration (`V2__...sql`, `V3__...sql`); do **not** hand-edit tables (e.g. in a DB GUI) or the next `validate` will flag the drift. Tests apply the same migrations against the Testcontainers Postgres (the test profile also uses `ddl-auto=validate`), so a broken migration turns the suite red.
 
 ## MapStruct conventions
 
