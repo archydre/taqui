@@ -11,6 +11,7 @@ import com.taqui.backend.modules.product.repository.ProductRepository;
 import com.taqui.backend.modules.user.entity.User;
 import com.taqui.backend.modules.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -58,6 +60,9 @@ public abstract class AbstractIntegrationTest {
     @Autowired protected PostRepository postRepository;
     @Autowired protected OrderRepository orderRepository;
     @Autowired protected PasswordEncoder passwordEncoder;
+
+    // Sem broker nos testes: mockar evita bater no RabbitMQ (e mandar email real) no fluxo de registro.
+    @MockitoBean protected RabbitTemplate rabbitTemplate;
 
     @BeforeEach
     void cleanDatabase() {
