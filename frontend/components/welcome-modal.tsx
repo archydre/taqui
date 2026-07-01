@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 
-const authRoutes = ["/entrar", "/cadastrar"];
+const authRoutes = ["/entrar", "/cadastrar", "/verify"];
 
 // Quem decide se mostra é o script inline do layout (roda antes da pintura e
 // marca html.welcome-open). Aqui só lemos essa classe, sem flash de hidratação.

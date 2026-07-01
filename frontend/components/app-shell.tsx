@@ -7,7 +7,7 @@ import { SideRail } from "./side-rail";
 import { ProfileSidebar } from "./profile-sidebar";
 import { WelcomeModal } from "./welcome-modal";
 
-const authRoutes = ["/entrar", "/cadastrar"];
+const authRoutes = ["/entrar", "/cadastrar", "/verify"];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
