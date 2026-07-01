@@ -9,5 +9,6 @@ public record UserResponseDTO(
         String displayName,
         String whatsapp,
         String pixKey,
-        String postalCode) {
+        String postalCode,
+        boolean emailVerified) {
 }
