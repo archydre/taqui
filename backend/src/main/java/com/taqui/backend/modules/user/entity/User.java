@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,4 +54,13 @@ public class User {
 
     @Column(name = "postal_code")
     private String postalCode;
+
+    @Column(name = "email_verified", columnDefinition = "boolean not null default false")
+    private boolean emailVerified;
+
+    @Column(name = "verification_token")
+    private String verificationToken;
+
+    @Column(name = "verification_token_expires_at")
+    private Instant verificationTokenExpiresAt;
 }
