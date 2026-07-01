@@ -19,6 +19,7 @@ type RequestOptions = {
   method?: "GET" | "POST" | "PUT" | "DELETE";
   token?: string | null;
   body?: unknown;
+  timeoutMs?: number;
 };
 
 // Mensagem amigável por status, sem expor caminho nem ID interno.
@@ -65,10 +66,12 @@ export function setUnauthorizedHandler(handler: (() => void) | null): void {
 }
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = "GET", token, body } = options;
+  const { method = "GET", token, body, timeoutMs } = options;
   const res = await fetch(new URL(path, API_BASE_URL), {
     method,
     cache: "no-store",
+    // Sem timeout o fetch espera pra sempre; com ele, um back travado vira erro.
+    signal: timeoutMs ? AbortSignal.timeout(timeoutMs) : undefined,
     headers: {
       ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -246,7 +249,10 @@ export function register(input: RegisterInput): Promise<unknown> {
 }
 
 export function verifyEmail(token: string): Promise<void> {
-  return request(`/auth/verify?token=${encodeURIComponent(token)}`, { method: "POST" });
+  return request(`/auth/verify?token=${encodeURIComponent(token)}`, {
+    method: "POST",
+    timeoutMs: 10_000,
+  });
 }
 
 // ---- Usuário ----
