@@ -12,8 +12,14 @@ Rotas públicas.
 
 | Método | Rota | O que faz |
 |--------|------|-----------|
-| POST | `/auth/register` | cria um usuário (email, password, username, displayName) |
+| POST | `/auth/register` | cria um usuário (email, password, username, displayName) e dispara o email de verificação |
 | POST | `/auth/login` | valida as credenciais e devolve um JWT |
+| POST | `/auth/verify?token=` | confirma o email pelo token do link (marca `emailVerified`); token inválido/expirado → **400** |
+
+No registro o back gera um token de verificação (válido por 24h) e publica na fila `email.verify.request`;
+o worker Python (`services/Emailverify.py`) monta e envia o email. O link do email aponta pro front
+(`/verify?token=`), que então chama `POST /auth/verify`. O envio é best-effort: se o email falhar, a conta
+ainda é criada (o cadastro responde **201**). O `emailVerified` do usuário aparece em `GET /users/me`.
 
 ### Products
 
