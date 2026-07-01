@@ -8,6 +8,7 @@ import com.taqui.backend.modules.order.repository.OrderRepository;
 import com.taqui.backend.modules.post.repository.PostRepository;
 import com.taqui.backend.modules.product.entity.Product;
 import com.taqui.backend.modules.product.repository.ProductRepository;
+import com.taqui.backend.modules.storage.service.StorageService;
 import com.taqui.backend.modules.user.entity.User;
 import com.taqui.backend.modules.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,6 +64,9 @@ public abstract class AbstractIntegrationTest {
 
     // Sem broker nos testes: mockar evita bater no RabbitMQ (e mandar email real) no fluxo de registro.
     @MockitoBean protected RabbitTemplate rabbitTemplate;
+
+    // Mockado pra não bater no R2 real; os testes verificam as chamadas de limpeza.
+    @MockitoBean protected StorageService storageService;
 
     @BeforeEach
     void cleanDatabase() {

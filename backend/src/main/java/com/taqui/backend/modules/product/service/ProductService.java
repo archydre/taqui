@@ -5,6 +5,7 @@ import com.taqui.backend.modules.product.entity.Product;
 import com.taqui.backend.modules.product.exception.ProductNotFoundException;
 import com.taqui.backend.modules.product.mapper.ProductMapper;
 import com.taqui.backend.modules.product.repository.ProductRepository;
+import com.taqui.backend.modules.storage.service.StorageService;
 import com.taqui.backend.modules.user.entity.User;
 import com.taqui.backend.modules.user.exception.PixKeyRequiredException;
 import com.taqui.backend.modules.user.exception.UserNotFoundException;
@@ -26,6 +27,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final UserRepository userRepository;
+    private final StorageService storageService;
 
     @Transactional(readOnly = true)
     public Page<Product> findAllProductsByOrderByCreatedAtDesc(String q, String owner, Pageable pageable) {
@@ -73,7 +75,17 @@ public class ProductService {
     public Product updateProduct(ProductRequestDTO productRequestDTO, UUID ownerId, UUID productId) {
         Product product = findProductById(productId);
         checkOwnership(product, ownerId);
+
+        String oldImage = product.getImageUrl();
+        String oldThumb = product.getThumbnailUrl();
         productMapper.updateEntityFromDTO(productRequestDTO, product);
+
+        // Trocou por uma imagem nova e diferente? A antiga vira órfã no bucket -> apaga.
+        String newImage = product.getImageUrl();
+        if (newImage != null && !newImage.isBlank() && !newImage.equals(oldImage)) {
+            storageService.deleteObject(oldImage);
+            storageService.deleteObject(oldThumb);
+        }
         return product;
     }
 
@@ -81,6 +93,8 @@ public class ProductService {
     public void delete(UUID productId, UUID ownerId) {
         Product product = findProductById(productId);
         checkOwnership(product, ownerId);
+        storageService.deleteObject(product.getImageUrl());
+        storageService.deleteObject(product.getThumbnailUrl());
         productRepository.delete(product);
     }
 
