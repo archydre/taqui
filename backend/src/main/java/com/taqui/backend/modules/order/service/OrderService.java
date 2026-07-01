@@ -1,6 +1,7 @@
 package com.taqui.backend.modules.order.service;
 
 import com.taqui.backend.modules.order.dto.OrderRequestDTO;
+import com.taqui.backend.modules.order.dto.PixQrResponseDTO;
 import com.taqui.backend.modules.order.entity.Order;
 import com.taqui.backend.modules.order.entity.OrderStatus;
 import com.taqui.backend.modules.order.exception.InvalidOrderStateException;
@@ -83,6 +84,23 @@ public class OrderService {
                 .orElseThrow(() -> new OrderNotFoundException("Pedido não encontrado: " + orderId));
         checkParticipant(order, currentUserId);
         return order;
+    }
+
+    // O vendedor não tem cidade cadastrada; usa um placeholder no BR Code (campo obrigatório).
+    private static final String MERCHANT_CITY = "BRASIL";
+
+    @Transactional(readOnly = true)
+    public PixQrResponseDTO getPixQr(UUID orderId, UUID currentUserId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Pedido não encontrado: " + orderId));
+        checkParticipant(order, currentUserId);
+        String copyPaste = PixBrCodeGenerator.build(
+                order.getSellerPixKey(),
+                order.getTotal(),
+                order.getProduct().getOwner().getDisplayName(),
+                MERCHANT_CITY,
+                order.getOrderId().toString());
+        return new PixQrResponseDTO(copyPaste, order.getTotal());
     }
 
     @Transactional
