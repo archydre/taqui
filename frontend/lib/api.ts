@@ -442,6 +442,12 @@ export function getOrderById(token: string, orderId: string): Promise<Order> {
   return request(`/orders/${orderId}`, { token });
 }
 
+export type PixQr = { copyPaste: string; amount: number };
+
+export function getPixQr(token: string, orderId: string): Promise<PixQr> {
+  return request(`/orders/${orderId}/pix-qr`, { token });
+}
+
 export function productImage(product: Product): string | null {
   return product.thumbnailUrl ?? product.imageUrl;
 }
