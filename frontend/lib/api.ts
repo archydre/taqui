@@ -16,7 +16,7 @@ export class ApiError extends Error {
 }
 
 type RequestOptions = {
-  method?: "GET" | "POST" | "PUT" | "DELETE";
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   token?: string | null;
   body?: unknown;
   timeoutMs?: number;
@@ -440,6 +440,42 @@ export function getMyOrders(token: string, page = 0, size = 20): Promise<Page<Or
 
 export function getOrderById(token: string, orderId: string): Promise<Order> {
   return request(`/orders/${orderId}`, { token });
+}
+
+// ---- Carrinho ----
+
+export type CartItem = {
+  id: string;
+  product: Product;
+  quantity: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AddToCartInput = { productId: string; quantity: number };
+
+export function getCart(token: string): Promise<CartItem[]> {
+  return request("/cart", { token });
+}
+
+export function addToCart(token: string, input: AddToCartInput): Promise<CartItem> {
+  return request("/cart/items", { method: "POST", token, body: input });
+}
+
+export function updateCartItem(
+  token: string,
+  productId: string,
+  quantity: number,
+): Promise<CartItem> {
+  return request(`/cart/items/${productId}`, {
+    method: "PATCH",
+    token,
+    body: { quantity },
+  });
+}
+
+export function removeFromCart(token: string, productId: string): Promise<void> {
+  return request(`/cart/items/${productId}`, { method: "DELETE", token });
 }
 
 // ---- Endereços salvos ----
