@@ -249,6 +249,26 @@ continua sendo **copiado (snapshot)** para dentro do pedido, então editar ou ap
 salvo depois **não** mexe em pedidos já feitos. Erros (ProblemDetail): **404** endereço inexistente,
 **403** ao apagar um endereço que não é seu, **400** na validação do corpo.
 
+### Carrinho (Cart)
+
+Itens que o usuário salva para comprar depois (tabela `cart_items`, 1 linha por produto). Todas as
+rotas precisam do header `Authorization: Bearer <jwt>` e operam **só** sobre o carrinho do dono
+autenticado. Ao contrário do pedido, o carrinho **não** guarda snapshot de preço/frete/endereço: o
+checkout continua sendo por produto/vendedor (rota de pedidos), e é lá que preço e frete são fixados.
+
+| Método | Rota | O que faz |
+|--------|------|-----------|
+| GET | `/cart` | lista meus itens (com o produto embutido), mais recentes primeiro |
+| POST | `/cart/items` | adiciona um produto; se já está no carrinho, **soma** a quantidade |
+| PATCH | `/cart/items/{productId}` | define a quantidade do item (`quantity >= 1`) |
+| DELETE | `/cart/items/{productId}` | remove o item do carrinho |
+
+O corpo de adicionar é `{ "productId": UUID, "quantity": >=1 }`; o de atualizar é `{ "quantity": >=1 }`.
+A resposta (`CartItemResponseDTO`) traz `id`, o `product` completo e a `quantity`. A unicidade
+`(buyer, product)` garante 1 linha por produto — por isso a rota é chaveada por `productId`. Erros
+(ProblemDetail): **404** produto inexistente ou item fora do carrinho, **409** ao adicionar o próprio
+produto, **400** na validação do corpo.
+
 ### Notificações (Notifications)
 
 Notificam o usuário dos eventos de pedido, **in-app** (contador de não-lidas) e por **email**. Cada
