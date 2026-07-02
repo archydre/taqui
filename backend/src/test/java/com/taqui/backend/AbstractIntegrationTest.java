@@ -1,6 +1,8 @@
 package com.taqui.backend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.taqui.backend.modules.address.entity.UserAddress;
+import com.taqui.backend.modules.address.repository.UserAddressRepository;
 import com.taqui.backend.modules.order.entity.Address;
 import com.taqui.backend.modules.order.entity.Order;
 import com.taqui.backend.modules.order.entity.OrderStatus;
@@ -60,6 +62,7 @@ public abstract class AbstractIntegrationTest {
     @Autowired protected ProductRepository productRepository;
     @Autowired protected PostRepository postRepository;
     @Autowired protected OrderRepository orderRepository;
+    @Autowired protected UserAddressRepository userAddressRepository;
     @Autowired protected PasswordEncoder passwordEncoder;
 
     // Sem broker nos testes: mockar evita bater no RabbitMQ (e mandar email real) no fluxo de registro.
@@ -70,6 +73,7 @@ public abstract class AbstractIntegrationTest {
 
     @BeforeEach
     void cleanDatabase() {
+        userAddressRepository.deleteAll();
         orderRepository.deleteAll();
         postRepository.deleteAll();
         productRepository.deleteAll();
@@ -126,6 +130,23 @@ public abstract class AbstractIntegrationTest {
         order.setAddress(address);
         order.setStatus(status);
         return orderRepository.save(order);
+    }
+
+    /** Persiste um endereço salvo do usuário (mesmos campos do snapshot de pedido). */
+    protected UserAddress givenSavedAddress(User owner) {
+        Address address = new Address();
+        address.setRecipientName("Maria Compradora");
+        address.setPostalCode("59600000");
+        address.setStreet("Rua das Flores");
+        address.setNumber("100");
+        address.setDistrict("Centro");
+        address.setCity("Mossoró");
+        address.setState("RN");
+
+        UserAddress saved = new UserAddress();
+        saved.setOwner(owner);
+        saved.setAddress(address);
+        return userAddressRepository.save(saved);
     }
 
     /** Forja um request autenticado como o usuário (só o claim sub = userId, que os controllers leem). */
