@@ -227,3 +227,26 @@ snapshots, o `sellerPixKey`, o `address`, o `status` e os timestamps. Erros (Pro
 produto ou pedido inexistente, **403** se você não é participante do pedido (no GET) ou não é o
 vendedor (no confirm), **409** ao confirmar um pedido que não está `AGUARDANDO_PAGAMENTO` ou ao comprar o próprio produto, **422** se
 o vendedor não tem Pix cadastrado, **400** na validação do corpo.
+
+### Notificações (Notifications)
+
+Notificam o usuário dos eventos de pedido, **in-app** (contador de não-lidas) e por **email**. Cada
+transição do pedido publica um evento de domínio; um listener `@Async` + `@TransactionalEventListener(AFTER_COMMIT)`
+grava a notificação (só **depois** do commit do pedido, nunca em cima de um rollback, e sem travar a
+request) e publica o email numa fila do RabbitMQ. Nunca notifica o **autor** da ação, só a contraparte.
+Todas as rotas precisam do header `Authorization: Bearer <jwt>` e são escopadas ao usuário do token.
+
+| Método | Rota | O que faz |
+|--------|------|-----------|
+| GET | `/notifications` | minhas notificações, paginadas, das mais novas pras mais antigas |
+| GET | `/notifications/unread-count` | quantas não lidas (`{ "count": N }`) — query quente do sino |
+| PUT | `/notifications/{id}/read` | marca uma como lida (só a própria; senão **404**) |
+| PUT | `/notifications/read-all` | marca todas as minhas como lidas |
+
+Eventos e destinatário: **NEW_ORDER** (comprador cria → vendedor), **PAYMENT_CONFIRMED** (vendedor
+confirma o Pix → comprador), **ORDER_SHIPPED** (vendedor envia → comprador), **ORDER_CANCELLED**
+(um cancela → a contraparte). A `NotificationResponseDTO` traz `id`, `type`, `relatedEntityType`
+(`ORDER`) + `relatedEntityId` (pro front linkar), `message` (texto já montado), `read` e `createdAt`.
+O email reusa o worker Python (`services/Emailverify.py`, fila `notification.email.request`,
+fire-and-forget) — sem `GMAIL_USER`/`GMAIL_APP_PASSWORD` no worker, o in-app funciona e o email é
+só descartado. As notificações são best-effort: uma falha ao notificar nunca derruba o pedido.
