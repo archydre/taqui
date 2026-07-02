@@ -9,6 +9,7 @@ import {
   getMyAddresses,
   getProductById,
   quoteFreightForProduct,
+  removeFromCart,
   type FreightOption,
   type Product,
   type SavedAddress,
@@ -205,6 +206,8 @@ function Checkout({ productId }: { productId: string }) {
           // salvar o endereço é secundário; o pedido já foi criado
         }
       }
+      // O produto virou pedido: se estava no carrinho, tira de lá (limpeza best-effort).
+      removeFromCart(token, productId).catch(() => {});
       router.push(`/pedidos/${order.orderId}`);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Não deu para finalizar o pedido.");
