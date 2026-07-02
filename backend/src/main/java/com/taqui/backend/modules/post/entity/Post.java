@@ -1,5 +1,6 @@
 package com.taqui.backend.modules.post.entity;
 
+import com.taqui.backend.common.AuditableEntity;
 import com.taqui.backend.modules.product.entity.Product;
 import com.taqui.backend.modules.user.entity.User;
 import jakarta.persistence.*;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "posts")
-public class Post {
+public class Post extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
