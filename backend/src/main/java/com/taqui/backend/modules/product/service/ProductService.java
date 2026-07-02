@@ -1,5 +1,8 @@
 package com.taqui.backend.modules.product.service;
 
+import com.taqui.backend.modules.audit.entity.AuditAction;
+import com.taqui.backend.modules.audit.entity.AuditEntityType;
+import com.taqui.backend.modules.audit.service.AuditService;
 import com.taqui.backend.modules.product.dto.ProductRequestDTO;
 import com.taqui.backend.modules.product.entity.Product;
 import com.taqui.backend.modules.product.exception.ProductNotFoundException;
@@ -28,6 +31,7 @@ public class ProductService {
     private final ProductMapper productMapper;
     private final UserRepository userRepository;
     private final StorageService storageService;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public Page<Product> findAllProductsByOrderByCreatedAtDesc(String q, String owner, Pageable pageable) {
@@ -67,7 +71,9 @@ public class ProductService {
         }
         Product product = productMapper.toEntity(productRequestDTO);
         product.setOwner(owner);
-        return productRepository.save(product);
+        Product saved = productRepository.save(product);
+        auditService.record(ownerId, AuditAction.CREATE, AuditEntityType.PRODUCT, saved.getProductId());
+        return saved;
     }
 
 
@@ -86,6 +92,7 @@ public class ProductService {
             storageService.deleteObject(oldImage);
             storageService.deleteObject(oldThumb);
         }
+        auditService.record(ownerId, AuditAction.UPDATE, AuditEntityType.PRODUCT, productId);
         return product;
     }
 
@@ -93,6 +100,7 @@ public class ProductService {
     public void delete(UUID productId, UUID ownerId) {
         Product product = findProductById(productId);
         checkOwnership(product, ownerId);
+        auditService.record(ownerId, AuditAction.DELETE, AuditEntityType.PRODUCT, productId);
         storageService.deleteObject(product.getImageUrl());
         storageService.deleteObject(product.getThumbnailUrl());
         productRepository.delete(product);
