@@ -442,6 +442,22 @@ export function getOrderById(token: string, orderId: string): Promise<Order> {
   return request(`/orders/${orderId}`, { token });
 }
 
+// ---- Endereços salvos ----
+
+export type SavedAddress = Address & { id: string };
+
+export function getMyAddresses(token: string): Promise<SavedAddress[]> {
+  return request("/addresses", { token });
+}
+
+export function createAddress(token: string, input: Address): Promise<SavedAddress> {
+  return request("/addresses", { method: "POST", token, body: input });
+}
+
+export function deleteAddress(token: string, id: string): Promise<void> {
+  return request(`/addresses/${id}`, { method: "DELETE", token });
+}
+
 // ---- Notificações ----
 
 export type NotificationType =
