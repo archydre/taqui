@@ -10,6 +10,7 @@ import {
   IconPlus,
   IconUser,
 } from "./icons";
+import { NotificationBell } from "./notification-bell";
 
 export function SideRail() {
   const pathname = usePathname();
@@ -65,6 +66,8 @@ export function SideRail() {
           <Icon className="h-6 w-6" />
         </Link>
       ))}
+
+      <NotificationBell />
     </nav>
   );
 }

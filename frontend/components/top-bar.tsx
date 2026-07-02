@@ -2,6 +2,7 @@ import { Brand } from "./brand";
 import { SearchBar } from "./search-bar";
 import { MainNav } from "./main-nav";
 import { AuthMenu } from "./auth-menu";
+import { NotificationBell } from "./notification-bell";
 
 export function TopBar() {
   return (
@@ -15,6 +16,7 @@ export function TopBar() {
         </div>
         <div className="ml-auto flex items-center gap-2 sm:ml-0">
           <MainNav />
+          <NotificationBell variant="bar" />
           <AuthMenu />
         </div>
       </div>
