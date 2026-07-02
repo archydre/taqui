@@ -228,6 +228,27 @@ produto ou pedido inexistente, **403** se você não é participante do pedido (
 vendedor (no confirm), **409** ao confirmar um pedido que não está `AGUARDANDO_PAGAMENTO` ou ao comprar o próprio produto, **422** se
 o vendedor não tem Pix cadastrado, **400** na validação do corpo.
 
+### Endereços salvos (Addresses)
+
+Endereços de entrega que o usuário salva para **reusar no checkout** em vez de digitar tudo de novo.
+Um usuário tem N endereços (tabela `user_addresses`). Todas as rotas precisam do header
+`Authorization: Bearer <jwt>` e operam **só** sobre os endereços do dono autenticado.
+
+| Método | Rota | O que faz |
+|--------|------|-----------|
+| GET | `/addresses` | lista meus endereços salvos (mais recentes primeiro) |
+| POST | `/addresses` | salva um endereço novo |
+| DELETE | `/addresses/{addressId}` | apaga um endereço meu |
+
+O corpo de criar é o mesmo `AddressDTO` do pedido (`recipientName`, `postalCode` 8 dígitos, `street`,
+`number`, `complement` opcional, `district`, `city`, `state` com 2 letras). A resposta
+(`SavedAddressDTO`) é esse endereço com um `id`.
+
+O endereço salvo é só a **fonte** para pré-preencher o checkout: ao criar o pedido o `address`
+continua sendo **copiado (snapshot)** para dentro do pedido, então editar ou apagar um endereço
+salvo depois **não** mexe em pedidos já feitos. Erros (ProblemDetail): **404** endereço inexistente,
+**403** ao apagar um endereço que não é seu, **400** na validação do corpo.
+
 ### Notificações (Notifications)
 
 Notificam o usuário dos eventos de pedido, **in-app** (contador de não-lidas) e por **email**. Cada

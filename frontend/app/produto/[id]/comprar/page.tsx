@@ -4,11 +4,14 @@ import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ApiError,
+  createAddress,
   createOrder,
+  getMyAddresses,
   getProductById,
   quoteFreightForProduct,
   type FreightOption,
   type Product,
+  type SavedAddress,
 } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
@@ -21,6 +24,38 @@ const FALLBACK_FREIGHT: FreightChoice = {
   price: 0,
   label: "Combinar com o vendedor — grátis",
 };
+
+const EMPTY_ADDRESS = {
+  recipientName: "",
+  postalCode: "",
+  street: "",
+  number: "",
+  complement: "",
+  district: "",
+  city: "",
+  state: "",
+};
+
+// "new" = digitar um endereço novo; qualquer outro valor = id de um endereço salvo.
+const NEW_ADDRESS = "new";
+
+function formatCep(cep: string): string {
+  const digits = cep.replace(/\D/g, "");
+  return digits.length === 8 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : cep;
+}
+
+function pickAddressFields(saved: SavedAddress): typeof EMPTY_ADDRESS {
+  return {
+    recipientName: saved.recipientName,
+    postalCode: saved.postalCode,
+    street: saved.street,
+    number: saved.number,
+    complement: saved.complement ?? "",
+    district: saved.district,
+    city: saved.city,
+    state: saved.state,
+  };
+}
 
 export default function ComprarPage({
   params,
@@ -43,16 +78,11 @@ function Checkout({ productId }: { productId: string }) {
   const [loadError, setLoadError] = useState(false);
   const isOwner = !!product && !!user && user.username === product.owner.username;
   const [quantity, setQuantity] = useState(1);
-  const [address, setAddress] = useState({
-    recipientName: "",
-    postalCode: "",
-    street: "",
-    number: "",
-    complement: "",
-    district: "",
-    city: "",
-    state: "",
-  });
+  const [address, setAddress] = useState({ ...EMPTY_ADDRESS });
+
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [selectedId, setSelectedId] = useState<string>(NEW_ADDRESS);
+  const [saveNew, setSaveNew] = useState(true);
 
   const [options, setOptions] = useState<FreightOption[] | null>(null);
   const [quoting, setQuoting] = useState(false);
@@ -71,6 +101,41 @@ function Checkout({ productId }: { productId: string }) {
   useEffect(() => {
     if (isOwner) router.replace(`/produto/${productId}`);
   }, [isOwner, productId, router]);
+
+  useEffect(() => {
+    if (!token) return;
+    getMyAddresses(token)
+      .then((list) => {
+        setSavedAddresses(list);
+        if (list.length > 0) {
+          const first = list[0];
+          setSelectedId(first.id);
+          setAddress(pickAddressFields(first));
+        }
+      })
+      .catch(() => {
+        // sem endereços salvos (ou falha ao buscar): segue com o formulário em branco
+      });
+  }, [token]);
+
+  // Trocar o endereço muda o CEP, então a cotação de frete anterior deixa de valer.
+  function resetFreight() {
+    setOptions(null);
+    setChoice(null);
+    setFreightError(null);
+  }
+
+  function selectSaved(saved: SavedAddress) {
+    setSelectedId(saved.id);
+    setAddress(pickAddressFields(saved));
+    resetFreight();
+  }
+
+  function selectNew() {
+    setSelectedId(NEW_ADDRESS);
+    setAddress({ ...EMPTY_ADDRESS });
+    resetFreight();
+  }
 
   function updateAddress(field: keyof typeof address) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -133,6 +198,13 @@ function Checkout({ productId }: { productId: string }) {
         freightPrice: choice.price,
         address: { ...address, postalCode: cepDigits },
       });
+      if (selectedId === NEW_ADDRESS && saveNew) {
+        try {
+          await createAddress(token, { ...address, postalCode: cepDigits });
+        } catch {
+          // salvar o endereço é secundário; o pedido já foi criado
+        }
+      }
       router.push(`/pedidos/${order.orderId}`);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Não deu para finalizar o pedido.");
@@ -173,18 +245,66 @@ function Checkout({ productId }: { productId: string }) {
         <h2 className="mt-2 font-display text-lg font-semibold text-ink">
           Endereço de entrega
         </h2>
-        <Field label="Nome de quem recebe" value={address.recipientName} onChange={updateAddress("recipientName")} required />
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="CEP" value={address.postalCode} onChange={updateAddress("postalCode")} placeholder="59600000" required />
-          <Field label="Número" value={address.number} onChange={updateAddress("number")} required />
-        </div>
-        <Field label="Rua" value={address.street} onChange={updateAddress("street")} required />
-        <Field label="Complemento" value={address.complement} onChange={updateAddress("complement")} />
-        <Field label="Bairro" value={address.district} onChange={updateAddress("district")} required />
-        <div className="grid grid-cols-[1fr_5rem] gap-3">
-          <Field label="Cidade" value={address.city} onChange={updateAddress("city")} required />
-          <Field label="UF" value={address.state} onChange={updateAddress("state")} placeholder="RN" required />
-        </div>
+
+        {savedAddresses.length > 0 ? (
+          <div className="flex flex-col gap-2">
+            {savedAddresses.map((saved) => (
+              <button
+                key={saved.id}
+                type="button"
+                onClick={() => selectSaved(saved)}
+                className={`flex flex-col items-start rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${
+                  selectedId === saved.id
+                    ? "border-action bg-action/5"
+                    : "border-line bg-surface hover:bg-ink/5"
+                }`}
+              >
+                <span className="font-medium text-ink">{saved.recipientName}</span>
+                <span className="text-ink-soft">
+                  {formatCep(saved.postalCode)} · {saved.street}
+                  {saved.number ? `, ${saved.number}` : ""}
+                </span>
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={selectNew}
+              className={`rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors ${
+                selectedId === NEW_ADDRESS
+                  ? "border-action bg-action/5 text-ink"
+                  : "border-line bg-surface text-ink-soft hover:bg-ink/5"
+              }`}
+            >
+              + Usar outro endereço
+            </button>
+          </div>
+        ) : null}
+
+        {selectedId === NEW_ADDRESS ? (
+          <>
+            <Field label="Nome de quem recebe" value={address.recipientName} onChange={updateAddress("recipientName")} required />
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="CEP" value={address.postalCode} onChange={updateAddress("postalCode")} placeholder="59600000" required />
+              <Field label="Número" value={address.number} onChange={updateAddress("number")} required />
+            </div>
+            <Field label="Rua" value={address.street} onChange={updateAddress("street")} required />
+            <Field label="Complemento" value={address.complement} onChange={updateAddress("complement")} />
+            <Field label="Bairro" value={address.district} onChange={updateAddress("district")} required />
+            <div className="grid grid-cols-[1fr_5rem] gap-3">
+              <Field label="Cidade" value={address.city} onChange={updateAddress("city")} required />
+              <Field label="UF" value={address.state} onChange={updateAddress("state")} placeholder="RN" required />
+            </div>
+            <label className="flex items-center gap-2 text-sm text-ink">
+              <input
+                type="checkbox"
+                checked={saveNew}
+                onChange={(e) => setSaveNew(e.target.checked)}
+                className="accent-[var(--color-action)]"
+              />
+              Salvar este endereço para a próxima compra
+            </label>
+          </>
+        ) : null}
 
         <div className="mt-2">
           <button

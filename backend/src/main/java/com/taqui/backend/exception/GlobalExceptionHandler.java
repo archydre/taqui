@@ -1,5 +1,6 @@
 package com.taqui.backend.exception;
 
+import com.taqui.backend.modules.address.exception.AddressNotFoundException;
 import com.taqui.backend.modules.auth.exception.EmailDeliveryException;
 import com.taqui.backend.modules.auth.exception.InvalidVerificationTokenException;
 import com.taqui.backend.modules.comment.exception.CommentNotFoundException;
@@ -164,6 +165,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotificationNotFoundException.class)
     public ProblemDetail handleNotificationNotFound(NotificationNotFoundException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(AddressNotFoundException.class)
+    public ProblemDetail handleAddressNotFound(AddressNotFoundException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 }
