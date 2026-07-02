@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
 import { RequireAuth } from "@/components/require-auth";
 import { OrderStatusBadge } from "@/components/order-status-badge";
+import { PixPayment } from "@/components/pix-payment";
 
 export default function PedidoPage({
   params,
@@ -70,15 +71,7 @@ function PedidoDetail({ orderId }: { orderId: string }) {
       </div>
 
       {awaiting ? (
-        <div className="mt-4 rounded-2xl border border-price/30 bg-price/5 p-5">
-          <h2 className="font-display font-semibold text-ink">Pague com Pix</h2>
-          <p className="mt-1 text-sm text-ink-soft">
-            Faça o Pix para a chave abaixo. O vendedor confirma o pagamento e envia.
-          </p>
-          <p className="mt-3 rounded-lg border border-line bg-surface px-3 py-2 font-mono text-sm break-all text-ink">
-            {order.sellerPixKey}
-          </p>
-        </div>
+        <PixPayment orderId={order.orderId} pixKey={order.sellerPixKey} />
       ) : null}
 
       <div className="mt-4 rounded-2xl border border-line bg-surface p-5">
