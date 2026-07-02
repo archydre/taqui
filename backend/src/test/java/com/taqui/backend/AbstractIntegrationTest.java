@@ -3,6 +3,8 @@ package com.taqui.backend;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.taqui.backend.modules.address.entity.UserAddress;
 import com.taqui.backend.modules.address.repository.UserAddressRepository;
+import com.taqui.backend.modules.cart.entity.CartItem;
+import com.taqui.backend.modules.cart.repository.CartItemRepository;
 import com.taqui.backend.modules.order.entity.Address;
 import com.taqui.backend.modules.order.entity.Order;
 import com.taqui.backend.modules.order.entity.OrderStatus;
@@ -63,6 +65,7 @@ public abstract class AbstractIntegrationTest {
     @Autowired protected PostRepository postRepository;
     @Autowired protected OrderRepository orderRepository;
     @Autowired protected UserAddressRepository userAddressRepository;
+    @Autowired protected CartItemRepository cartItemRepository;
     @Autowired protected PasswordEncoder passwordEncoder;
 
     // Sem broker nos testes: mockar evita bater no RabbitMQ (e mandar email real) no fluxo de registro.
@@ -73,6 +76,7 @@ public abstract class AbstractIntegrationTest {
 
     @BeforeEach
     void cleanDatabase() {
+        cartItemRepository.deleteAll();
         userAddressRepository.deleteAll();
         orderRepository.deleteAll();
         postRepository.deleteAll();
@@ -130,6 +134,15 @@ public abstract class AbstractIntegrationTest {
         order.setAddress(address);
         order.setStatus(status);
         return orderRepository.save(order);
+    }
+
+    /** Persiste um item no carrinho de um comprador. */
+    protected CartItem givenCartItem(User buyer, Product product, int quantity) {
+        CartItem item = new CartItem();
+        item.setBuyer(buyer);
+        item.setProduct(product);
+        item.setQuantity(quantity);
+        return cartItemRepository.save(item);
     }
 
     /** Persiste um endereço salvo do usuário (mesmos campos do snapshot de pedido). */
