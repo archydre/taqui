@@ -2,6 +2,7 @@ package com.taqui.backend.modules.order.controller;
 
 import com.taqui.backend.modules.order.dto.OrderRequestDTO;
 import com.taqui.backend.modules.order.dto.OrderResponseDTO;
+import com.taqui.backend.modules.order.dto.PixQrResponseDTO;
 import com.taqui.backend.modules.order.entity.Order;
 import com.taqui.backend.modules.order.mapper.OrderMapper;
 import com.taqui.backend.modules.order.service.OrderService;
@@ -62,6 +63,14 @@ public class OrderController {
         UUID currentUserId = UUID.fromString(jwt.getSubject());
         Order order = orderService.findOrderById(orderId, currentUserId);
         return ResponseEntity.ok(orderMapper.toResponseDTO(order));
+    }
+
+    @GetMapping("/{orderId}/pix-qr")
+    public ResponseEntity<PixQrResponseDTO> getPixQr(
+            @PathVariable UUID orderId,
+            @AuthenticationPrincipal Jwt jwt) {
+        UUID currentUserId = UUID.fromString(jwt.getSubject());
+        return ResponseEntity.ok(orderService.getPixQr(orderId, currentUserId));
     }
 
     @PostMapping("/{orderId}/confirm-payment")
