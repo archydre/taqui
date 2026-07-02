@@ -6,6 +6,10 @@ import com.taqui.backend.modules.audit.service.AuditService;
 import com.taqui.backend.modules.order.dto.OrderRequestDTO;
 import com.taqui.backend.modules.order.entity.Order;
 import com.taqui.backend.modules.order.entity.OrderStatus;
+import com.taqui.backend.modules.order.event.OrderCancelledEvent;
+import com.taqui.backend.modules.order.event.OrderCreatedEvent;
+import com.taqui.backend.modules.order.event.OrderPaidEvent;
+import com.taqui.backend.modules.order.event.OrderShippedEvent;
 import com.taqui.backend.modules.order.exception.InvalidOrderStateException;
 import com.taqui.backend.modules.order.exception.OrderNotFoundException;
 import com.taqui.backend.modules.order.exception.SelfPurchaseException;
@@ -18,6 +22,7 @@ import com.taqui.backend.modules.user.exception.PixKeyRequiredException;
 import com.taqui.backend.modules.user.exception.UserNotFoundException;
 import com.taqui.backend.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -36,6 +41,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private final ProductService productService;
     private final AuditService auditService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Order createOrder(OrderRequestDTO dto, UUID buyerId) {
@@ -70,6 +76,8 @@ public class OrderService {
         order.setStatus(OrderStatus.AGUARDANDO_PAGAMENTO);
         Order saved = orderRepository.save(order);
         auditService.record(buyerId, AuditAction.CREATE, AuditEntityType.ORDER, saved.getOrderId());
+        eventPublisher.publishEvent(new OrderCreatedEvent(
+                saved.getOrderId(), seller.getUserId(), buyer.getDisplayName(), product.getProductName()));
         return saved;
     }
 
@@ -103,6 +111,9 @@ public class OrderService {
         }
         order.setStatus(OrderStatus.PAGO);
         auditService.record(sellerId, AuditAction.PAYMENT_CONFIRMED, AuditEntityType.ORDER, orderId);
+        eventPublisher.publishEvent(new OrderPaidEvent(
+                orderId, order.getBuyer().getUserId(),
+                order.getProduct().getOwner().getDisplayName(), order.getProduct().getProductName()));
         return order;
     }
 
@@ -118,6 +129,9 @@ public class OrderService {
         }
         order.setStatus(OrderStatus.ENVIADO);
         auditService.record(sellerId, AuditAction.SHIPPED, AuditEntityType.ORDER, orderId);
+        eventPublisher.publishEvent(new OrderShippedEvent(
+                orderId, order.getBuyer().getUserId(),
+                order.getProduct().getOwner().getDisplayName(), order.getProduct().getProductName()));
         return order;
     }
 
@@ -131,6 +145,15 @@ public class OrderService {
         }
         order.setStatus(OrderStatus.CANCELADO);
         auditService.record(currentUserId, AuditAction.CANCELLED, AuditEntityType.ORDER, orderId);
+        boolean actorIsBuyer = order.getBuyer().getUserId().equals(currentUserId);
+        UUID recipientId = actorIsBuyer
+                ? order.getProduct().getOwner().getUserId()
+                : order.getBuyer().getUserId();
+        String actorName = actorIsBuyer
+                ? order.getBuyer().getDisplayName()
+                : order.getProduct().getOwner().getDisplayName();
+        eventPublisher.publishEvent(new OrderCancelledEvent(
+                orderId, recipientId, actorName, order.getProduct().getProductName()));
         return order;
     }
 
