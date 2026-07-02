@@ -7,6 +7,7 @@ import com.taqui.backend.modules.freight.exception.FreightUnavailableException;
 import com.taqui.backend.modules.freight.exception.IncompleteFreightDataException;
 import com.taqui.backend.modules.image.exception.ImageProcessingException;
 import com.taqui.backend.modules.order.exception.InvalidOrderStateException;
+import com.taqui.backend.modules.notification.exception.NotificationNotFoundException;
 import com.taqui.backend.modules.order.exception.OrderNotFoundException;
 import com.taqui.backend.modules.order.exception.SelfPurchaseException;
 import com.taqui.backend.modules.product.exception.ProductNotFoundException;
@@ -159,5 +160,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EmailDeliveryException.class)
     public ProblemDetail handleEmailDelivery(EmailDeliveryException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
+    }
+
+    @ExceptionHandler(NotificationNotFoundException.class)
+    public ProblemDetail handleNotificationNotFound(NotificationNotFoundException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 }

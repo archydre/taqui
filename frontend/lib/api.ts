@@ -442,6 +442,52 @@ export function getOrderById(token: string, orderId: string): Promise<Order> {
   return request(`/orders/${orderId}`, { token });
 }
 
+// ---- Notificações ----
+
+export type NotificationType =
+  | "NEW_ORDER"
+  | "PAYMENT_CONFIRMED"
+  | "ORDER_SHIPPED"
+  | "ORDER_CANCELLED";
+
+export type NotificationEntityType = "ORDER";
+
+export type Notification = {
+  id: string;
+  type: NotificationType;
+  relatedEntityType: NotificationEntityType;
+  relatedEntityId: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+};
+
+export function getNotifications(
+  token: string,
+  page = 0,
+  size = 30,
+): Promise<Page<Notification>> {
+  return request(`/notifications${buildQuery({ page, size })}`, { token });
+}
+
+export function getUnreadNotificationCount(token: string): Promise<{ count: number }> {
+  return request("/notifications/unread-count", { token });
+}
+
+export function markNotificationRead(token: string, id: string): Promise<void> {
+  return request(`/notifications/${id}/read`, { method: "PUT", token });
+}
+
+export function markAllNotificationsRead(token: string): Promise<void> {
+  return request("/notifications/read-all", { method: "PUT", token });
+}
+
+// Link do recurso ligado à notificação (por ora só pedidos).
+export function notificationHref(n: Notification): string {
+  if (n.relatedEntityType === "ORDER") return `/pedidos/${n.relatedEntityId}`;
+  return "/notificacoes";
+}
+
 export function productImage(product: Product): string | null {
   return product.thumbnailUrl ?? product.imageUrl;
 }
