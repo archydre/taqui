@@ -2,6 +2,7 @@ package com.taqui.backend.exception;
 
 import com.taqui.backend.modules.address.exception.AddressNotFoundException;
 import com.taqui.backend.modules.auth.exception.EmailDeliveryException;
+import com.taqui.backend.modules.cart.exception.CartItemNotFoundException;
 import com.taqui.backend.modules.auth.exception.InvalidVerificationTokenException;
 import com.taqui.backend.modules.comment.exception.CommentNotFoundException;
 import com.taqui.backend.modules.freight.exception.FreightUnavailableException;
@@ -170,6 +171,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AddressNotFoundException.class)
     public ProblemDetail handleAddressNotFound(AddressNotFoundException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(CartItemNotFoundException.class)
+    public ProblemDetail handleCartItemNotFound(CartItemNotFoundException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 }
