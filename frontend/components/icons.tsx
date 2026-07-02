@@ -1,4 +1,4 @@
-type IconProps = { className?: string };
+export type IconProps = { className?: string };
 
 const base = {
   viewBox: "0 0 24 24",
@@ -52,6 +52,16 @@ export function IconBag({ className }: IconProps) {
     <svg {...base} className={className} aria-hidden="true">
       <path d="M6 7h12l-1 13H7L6 7Z" />
       <path d="M9 7a3 3 0 0 1 6 0" />
+    </svg>
+  );
+}
+
+export function IconCart({ className }: IconProps) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <path d="M3 4h2l2.3 11.3a1.5 1.5 0 0 0 1.5 1.2h7.4a1.5 1.5 0 0 0 1.47-1.16L19.5 8H6.2" />
+      <circle cx="9" cy="20" r="1.3" />
+      <circle cx="17" cy="20" r="1.3" />
     </svg>
   );
 }
