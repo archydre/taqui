@@ -24,14 +24,10 @@ export function WelcomeModal({ onReveal }: { onReveal?: () => void }) {
 
   if (user || authRoutes.includes(pathname) || !open || dismissed) return null;
 
-  // Saída explícita (Entrar / Criar conta / Continuar) encerra o "ativo".
+  // Sair (Entrar / Criar conta / Continuar) fecha o modal nesta navegação;
+  // deslogado, ele volta a aparecer no próximo carregamento.
   function leave() {
     document.documentElement.classList.remove("welcome-open");
-    try {
-      window.localStorage.setItem("taqui_welcome_active", "0");
-    } catch {
-      // ignora
-    }
   }
 
   function close() {
