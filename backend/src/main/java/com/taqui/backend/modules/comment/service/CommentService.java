@@ -1,5 +1,8 @@
 package com.taqui.backend.modules.comment.service;
 
+import com.taqui.backend.modules.audit.entity.AuditAction;
+import com.taqui.backend.modules.audit.entity.AuditEntityType;
+import com.taqui.backend.modules.audit.service.AuditService;
 import com.taqui.backend.modules.comment.dto.CommentRequestDTO;
 import com.taqui.backend.modules.comment.entity.Comment;
 import com.taqui.backend.modules.comment.exception.CommentNotFoundException;
@@ -26,6 +29,7 @@ public class CommentService {
     private final UserRepository userRepository;
     private final PostService postService;
     private final ProductService productService;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public Page<Comment> findByPost(UUID postId, Pageable pageable) {
@@ -46,7 +50,9 @@ public class CommentService {
         comment.setAuthor(userRepository.getReferenceById(authorId));
         comment.setContent(dto.content());
         comment.setPost(post);
-        return commentRepository.save(comment);
+        Comment saved = commentRepository.save(comment);
+        auditService.record(authorId, AuditAction.CREATE, AuditEntityType.COMMENT, saved.getCommentId());
+        return saved;
     }
 
     @Transactional
@@ -56,7 +62,9 @@ public class CommentService {
         comment.setAuthor(userRepository.getReferenceById(authorId));
         comment.setContent(dto.content());
         comment.setProduct(product);
-        return commentRepository.save(comment);
+        Comment saved = commentRepository.save(comment);
+        auditService.record(authorId, AuditAction.CREATE, AuditEntityType.COMMENT, saved.getCommentId());
+        return saved;
     }
 
     @Transactional
@@ -66,6 +74,7 @@ public class CommentService {
         if (!canDelete(comment, userId)) {
             throw new AccessDeniedException("Você não pode apagar esse comentário");
         }
+        auditService.record(userId, AuditAction.DELETE, AuditEntityType.COMMENT, commentId);
         commentRepository.delete(comment);
     }
 

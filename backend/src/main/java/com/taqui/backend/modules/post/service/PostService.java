@@ -1,5 +1,8 @@
 package com.taqui.backend.modules.post.service;
 
+import com.taqui.backend.modules.audit.entity.AuditAction;
+import com.taqui.backend.modules.audit.entity.AuditEntityType;
+import com.taqui.backend.modules.audit.service.AuditService;
 import com.taqui.backend.modules.post.dto.PostRequestDTO;
 import com.taqui.backend.modules.post.entity.Post;
 import com.taqui.backend.modules.post.exception.InvalidPostException;
@@ -30,6 +33,7 @@ public class PostService {
     private final UserRepository userRepository;
     private final ProductService productService;
     private final StorageService storageService;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public Post findPostById(UUID postId) {
@@ -63,7 +67,9 @@ public class PostService {
             }
             post.setProduct(product);
         }
-        return postRepository.save(post);
+        Post saved = postRepository.save(post);
+        auditService.record(ownerId, AuditAction.CREATE, AuditEntityType.POST, saved.getPostId());
+        return saved;
     }
 
     @Transactional
@@ -84,6 +90,7 @@ public class PostService {
             storageService.deleteObject(oldImage);
             storageService.deleteObject(oldThumb);
         }
+        auditService.record(ownerId, AuditAction.UPDATE, AuditEntityType.POST, postId);
         return post;
     }
 
@@ -91,6 +98,7 @@ public class PostService {
     public void deletePost(UUID postId, UUID ownerId) {
         Post post = findPostById(postId);
         checkOwnership(post, ownerId);
+        auditService.record(ownerId, AuditAction.DELETE, AuditEntityType.POST, postId);
         storageService.deleteObject(post.getImageUrl());
         storageService.deleteObject(post.getThumbnailUrl());
         postRepository.delete(post);

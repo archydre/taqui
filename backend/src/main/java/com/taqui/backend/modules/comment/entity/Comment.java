@@ -1,5 +1,6 @@
 package com.taqui.backend.modules.comment.entity;
 
+import com.taqui.backend.common.AuditableEntity;
 import com.taqui.backend.modules.post.entity.Post;
 import com.taqui.backend.modules.product.entity.Product;
 import com.taqui.backend.modules.user.entity.User;
@@ -15,7 +16,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "comments")
-public class Comment {
+public class Comment extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

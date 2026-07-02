@@ -1,5 +1,8 @@
 package com.taqui.backend.modules.order.service;
 
+import com.taqui.backend.modules.audit.entity.AuditAction;
+import com.taqui.backend.modules.audit.entity.AuditEntityType;
+import com.taqui.backend.modules.audit.service.AuditService;
 import com.taqui.backend.modules.order.dto.OrderRequestDTO;
 import com.taqui.backend.modules.order.dto.PixQrResponseDTO;
 import com.taqui.backend.modules.order.entity.Order;
@@ -33,6 +36,7 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final UserRepository userRepository;
     private final ProductService productService;
+    private final AuditService auditService;
 
     @Transactional
     public Order createOrder(OrderRequestDTO dto, UUID buyerId) {
@@ -65,7 +69,9 @@ public class OrderService {
         order.setSellerPixKey(seller.getPixKey());
         order.setAddress(orderMapper.toAddress(dto.address()));
         order.setStatus(OrderStatus.AGUARDANDO_PAGAMENTO);
-        return orderRepository.save(order);
+        Order saved = orderRepository.save(order);
+        auditService.record(buyerId, AuditAction.CREATE, AuditEntityType.ORDER, saved.getOrderId());
+        return saved;
     }
 
     @Transactional(readOnly = true)
@@ -114,6 +120,7 @@ public class OrderService {
             throw new InvalidOrderStateException("Pedido não está aguardando pagamento");
         }
         order.setStatus(OrderStatus.PAGO);
+        auditService.record(sellerId, AuditAction.PAYMENT_CONFIRMED, AuditEntityType.ORDER, orderId);
         return order;
     }
 
@@ -128,6 +135,7 @@ public class OrderService {
             throw new InvalidOrderStateException("Só dá pra enviar um pedido pago");
         }
         order.setStatus(OrderStatus.ENVIADO);
+        auditService.record(sellerId, AuditAction.SHIPPED, AuditEntityType.ORDER, orderId);
         return order;
     }
 
@@ -140,6 +148,7 @@ public class OrderService {
             throw new InvalidOrderStateException("Pedido não pode mais ser cancelado");
         }
         order.setStatus(OrderStatus.CANCELADO);
+        auditService.record(currentUserId, AuditAction.CANCELLED, AuditEntityType.ORDER, orderId);
         return order;
     }
 
