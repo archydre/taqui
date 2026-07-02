@@ -6,6 +6,7 @@ import {
   ApiError,
   createOrder,
   getProductById,
+  productImage,
   quoteFreightForProduct,
   type FreightOption,
   type Product,
@@ -19,7 +20,7 @@ type FreightChoice = { service: string; price: number; label: string };
 const FALLBACK_FREIGHT: FreightChoice = {
   service: "Combinar com o vendedor",
   price: 0,
-  label: "Combinar com o vendedor — grátis",
+  label: "Combinar com o vendedor",
 };
 
 export default function ComprarPage({
@@ -147,13 +148,29 @@ function Checkout({ productId }: { productId: string }) {
     return <p className="py-8 text-ink-soft">Carregando…</p>;
   }
 
+  const image = productImage(product);
+
   return (
     <div className="mx-auto w-full max-w-lg py-6">
       <h1 className="font-display text-2xl font-semibold text-ink">Finalizar compra</h1>
 
-      <div className="mt-4 flex items-center justify-between rounded-xl border border-line bg-surface p-4">
-        <span className="font-medium text-ink">{product.productName}</span>
-        <span className="font-display font-semibold text-ink">
+      <div className="mt-4 flex items-center gap-4 rounded-xl border border-line bg-surface p-4">
+        {image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={image}
+            alt=""
+            loading="lazy"
+            className="h-16 w-16 shrink-0 rounded-lg border border-line object-cover"
+          />
+        ) : (
+          <div
+            className="h-16 w-16 shrink-0 rounded-lg border border-line bg-canvas"
+            aria-hidden="true"
+          />
+        )}
+        <span className="min-w-0 flex-1 font-medium text-ink">{product.productName}</span>
+        <span className="shrink-0 font-display font-semibold text-ink">
           {formatPrice(product.price)}
         </span>
       </div>
@@ -174,8 +191,15 @@ function Checkout({ productId }: { productId: string }) {
           Endereço de entrega
         </h2>
         <Field label="Nome de quem recebe" value={address.recipientName} onChange={updateAddress("recipientName")} required />
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="CEP" value={address.postalCode} onChange={updateAddress("postalCode")} placeholder="59600000" required />
+        <div className="grid grid-cols-2 items-start gap-3">
+          <Field
+            label="CEP"
+            value={address.postalCode}
+            onChange={updateAddress("postalCode")}
+            placeholder="59600000"
+            required
+            hint={cepDigits.length !== 8 ? "Informe um CEP de 8 dígitos." : undefined}
+          />
           <Field label="Número" value={address.number} onChange={updateAddress("number")} required />
         </div>
         <Field label="Rua" value={address.street} onChange={updateAddress("street")} required />
@@ -191,13 +215,10 @@ function Checkout({ productId }: { productId: string }) {
             type="button"
             onClick={calcFreight}
             disabled={quoting || cepDigits.length !== 8}
-            className="rounded-full border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-ink/5 disabled:opacity-50"
+            className="rounded-full bg-action px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-action-strong disabled:opacity-50"
           >
             {quoting ? "Calculando…" : "Calcular frete"}
           </button>
-          {cepDigits.length !== 8 ? (
-            <span className="ml-2 text-xs text-ink-soft">Informe um CEP de 8 dígitos.</span>
-          ) : null}
         </div>
 
         {freightError ? (
@@ -254,12 +275,14 @@ function Field({
   onChange,
   placeholder,
   required,
+  hint,
 }: {
   label: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   required?: boolean;
+  hint?: string;
 }) {
   return (
     <label className="flex flex-col gap-1">
@@ -271,6 +294,7 @@ function Field({
         required={required}
         className="rounded-lg border border-line bg-surface px-3 py-2.5 text-sm text-ink placeholder:text-ink-soft focus-visible:border-action focus-visible:outline-none"
       />
+      {hint ? <span className="text-xs text-ink-soft">{hint}</span> : null}
     </label>
   );
 }
